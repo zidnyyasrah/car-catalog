@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/car_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/favorites_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://fsjnypyhwxmoqczohrsl.supabase.co',
+    anonKey: 'sb_publishable_cfmBT6DkfdEpjIUtO5fC4Q_X8-PF9Ae',
+  );
+
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
   ));
+
   runApp(const CarCatApp());
 }
 

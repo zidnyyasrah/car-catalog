@@ -9,11 +9,10 @@ class CarProvider extends ChangeNotifier {
 
   CarFilter _filter = const CarFilter();
   List<Car> _cars = [];
-  Set<String> _favorites = {};
+  final Set<String> _favorites = {};
   bool _loading = true;
   String? _error;
 
-  // Filter options loaded from DB
   List<String> brands = [];
   List<String> bodyTypes = [];
   List<String> driveSystems = [];
@@ -32,7 +31,6 @@ class CarProvider extends ChangeNotifier {
   Future<void> init() async {
     try {
       await _repo.seedIfEmpty(dummyCars);
-      _favorites = await _repo.getFavoriteIds();
       brands = await _repo.getDistinctBrands();
       bodyTypes = await _repo.getDistinctBodyTypes();
       driveSystems = await _repo.getDistinctDriveSystems();
@@ -59,12 +57,10 @@ class CarProvider extends ChangeNotifier {
     await _reload();
   }
 
-  Future<void> toggleFavorite(String carId) async {
+  void toggleFavorite(String carId) {
     if (_favorites.contains(carId)) {
-      await _repo.removeFavorite(carId);
       _favorites.remove(carId);
     } else {
-      await _repo.addFavorite(carId);
       _favorites.add(carId);
     }
     notifyListeners();

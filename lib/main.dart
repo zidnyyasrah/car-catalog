@@ -21,7 +21,7 @@ class CarCatApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => CarProvider(),
+      create: (_) => CarProvider()..init(),
       child: MaterialApp(
         title: 'CarCat - Katalog Mobil Indonesia',
         debugShowCheckedModeBanner: false,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/car_filter.dart';
 import '../providers/car_provider.dart';
-import '../data/car_data.dart';
 import '../theme/app_theme.dart';
 
 class FilterBottomSheet extends StatefulWidget {
@@ -14,11 +13,13 @@ class FilterBottomSheet extends StatefulWidget {
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   late CarFilter _localFilter;
+  late CarProvider _provider;
 
   @override
   void initState() {
     super.initState();
-    _localFilter = context.read<CarProvider>().filter;
+    _provider = context.read<CarProvider>();
+    _localFilter = _provider.filter;
   }
 
   @override
@@ -53,7 +54,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           const SizedBox(height: 16),
           _FilterSection(
             title: 'Brand',
-            items: allBrands,
+            items: _provider.brands,
             selected: _localFilter.brand,
             onSelect: (val) => setState(() =>
                 _localFilter = _localFilter.copyWith(
@@ -64,7 +65,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           const SizedBox(height: 16),
           _FilterSection(
             title: 'Tipe Kendaraan',
-            items: allBodyTypes,
+            items: _provider.bodyTypes,
             selected: _localFilter.bodyType,
             onSelect: (val) => setState(() =>
                 _localFilter = _localFilter.copyWith(
@@ -75,7 +76,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           const SizedBox(height: 16),
           _FilterSection(
             title: 'Transmisi',
-            items: allTransmissions,
+            items: CarProvider.transmissions,
             selected: _localFilter.transmission,
             onSelect: (val) => setState(() =>
                 _localFilter = _localFilter.copyWith(
@@ -86,7 +87,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           const SizedBox(height: 16),
           _FilterSection(
             title: 'Sistem Penggerak',
-            items: allDriveSystems,
+            items: _provider.driveSystems,
             selected: _localFilter.driveSystem,
             onSelect: (val) => setState(() =>
                 _localFilter = _localFilter.copyWith(

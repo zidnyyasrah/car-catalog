@@ -49,23 +49,17 @@ class _Header extends StatelessWidget {
               ),
               Text(
                 'Katalog Mobil Indonesia',
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
               ),
             ],
           ),
           const Spacer(),
           Consumer<CarProvider>(
             builder: (_, provider, __) {
-              final count = provider.filteredCars.length;
+              if (provider.loading) return const SizedBox.shrink();
               return Text(
-                '$count mobil',
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 13,
-                ),
+                '${provider.cars.length} mobil',
+                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
               );
             },
           ),
@@ -90,12 +84,16 @@ class _SearchBar extends StatelessWidget {
               style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'Cari brand, model, varian...',
-                prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary, size: 20),
+                prefixIcon:
+                    const Icon(Icons.search, color: AppTheme.textSecondary, size: 20),
                 suffixIcon: Consumer<CarProvider>(
                   builder: (_, provider, __) {
-                    if (provider.filter.searchQuery.isEmpty) return const SizedBox.shrink();
+                    if (provider.filter.searchQuery.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
                     return IconButton(
-                      icon: const Icon(Icons.clear, color: AppTheme.textSecondary, size: 18),
+                      icon: const Icon(Icons.clear,
+                          color: AppTheme.textSecondary, size: 18),
                       onPressed: () => provider.updateSearch(''),
                     );
                   },
@@ -154,24 +152,30 @@ class _ActiveFiltersRow extends StatelessWidget {
         final chips = <_FilterChipData>[];
 
         if (filter.brand != null) {
-          chips.add(_FilterChipData(label: filter.brand!, onRemove: () {
-            provider.updateFilter(filter.copyWith(clearBrand: true));
-          }));
+          chips.add(_FilterChipData(
+            label: filter.brand!,
+            onRemove: () => provider.updateFilter(filter.copyWith(clearBrand: true)),
+          ));
         }
         if (filter.bodyType != null) {
-          chips.add(_FilterChipData(label: filter.bodyType!, onRemove: () {
-            provider.updateFilter(filter.copyWith(clearBodyType: true));
-          }));
+          chips.add(_FilterChipData(
+            label: filter.bodyType!,
+            onRemove: () => provider.updateFilter(filter.copyWith(clearBodyType: true)),
+          ));
         }
         if (filter.transmission != null) {
-          chips.add(_FilterChipData(label: filter.transmission!, onRemove: () {
-            provider.updateFilter(filter.copyWith(clearTransmission: true));
-          }));
+          chips.add(_FilterChipData(
+            label: filter.transmission!,
+            onRemove: () =>
+                provider.updateFilter(filter.copyWith(clearTransmission: true)),
+          ));
         }
         if (filter.driveSystem != null) {
-          chips.add(_FilterChipData(label: filter.driveSystem!, onRemove: () {
-            provider.updateFilter(filter.copyWith(clearDriveSystem: true));
-          }));
+          chips.add(_FilterChipData(
+            label: filter.driveSystem!,
+            onRemove: () =>
+                provider.updateFilter(filter.copyWith(clearDriveSystem: true)),
+          ));
         }
 
         if (chips.isEmpty) return const SizedBox.shrink();
@@ -232,10 +236,8 @@ class _ActiveChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            data.label,
-            style: const TextStyle(color: AppTheme.accent, fontSize: 12),
-          ),
+          Text(data.label,
+              style: const TextStyle(color: AppTheme.accent, fontSize: 12)),
           const SizedBox(width: 4),
           GestureDetector(
             onTap: data.onRemove,
@@ -254,14 +256,33 @@ class _CarGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CarProvider>(
       builder: (_, provider, __) {
-        final cars = provider.filteredCars;
+        if (provider.loading) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: AppTheme.accent,
+              strokeWidth: 2,
+            ),
+          );
+        }
+
+        if (provider.error != null) {
+          return Center(
+            child: Text(
+              'Error: ${provider.error}',
+              style: const TextStyle(color: AppTheme.accent),
+            ),
+          );
+        }
+
+        final cars = provider.cars;
 
         if (cars.isEmpty) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.directions_car_outlined, size: 64, color: AppTheme.textSecondary),
+                Icon(Icons.directions_car_outlined,
+                    size: 64, color: AppTheme.textSecondary),
                 SizedBox(height: 12),
                 Text(
                   'Tidak ada mobil ditemukan',

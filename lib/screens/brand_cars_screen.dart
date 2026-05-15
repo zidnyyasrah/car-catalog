@@ -178,149 +178,130 @@ class _BrandHeader extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: 'brand-$brand',
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [info.primary, info.secondary],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [info.primary, info.secondary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
               ),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  right: -40,
-                  top: -40,
-                  child: Container(
-                    width: 180,
-                    height: 180,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.08),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 60,
-                  bottom: -30,
-                  child: Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.06),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.22),
-                              blurRadius: 18,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: CachedNetworkImage(
-                            imageUrl: info.logoUrl,
-                            fit: BoxFit.contain,
-                            placeholder: (_, __) => Center(
-                              child: SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 1.5,
-                                  color: info.primary,
-                                ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.22),
+                            blurRadius: 18,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: SizedBox(
+                        width: 72,
+                        height: 72,
+                        child: CachedNetworkImage(
+                          imageUrl: info.logoUrl,
+                          fit: BoxFit.contain,
+                          placeholder: (_, __) => Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.5,
+                                color: info.primary,
                               ),
                             ),
-                            errorWidget: (_, __, ___) => Text(
-                              brand.substring(0, 1),
-                              style: TextStyle(
-                                color: info.primary,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w900,
+                          ),
+                          errorWidget: (_, __, ___) => Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                brand.toUpperCase(),
+                                style: TextStyle(
+                                  color: info.primary,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                info.country,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              brand,
+                            child: Text(
+                              info.country,
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                                height: 1,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              info.tagline,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.85),
-                                fontSize: 11,
-                                fontStyle: FontStyle.italic,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            brand,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.5,
+                              height: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            info.tagline,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.85),
+                              fontSize: 11,
+                              fontStyle: FontStyle.italic,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              _HeaderPill(
+                                icon: Icons.directions_car_rounded,
+                                label: '$count mobil',
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                _HeaderPill(
-                                  icon: Icons.directions_car_rounded,
-                                  label: '$count mobil',
-                                ),
-                                const SizedBox(width: 6),
-                                _HeaderPill(
-                                  icon: Icons.history_rounded,
-                                  label: 'Sejak ${info.foundedYear}',
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              const SizedBox(width: 6),
+                              _HeaderPill(
+                                icon: Icons.history_rounded,
+                                label: 'Sejak ${info.foundedYear}',
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

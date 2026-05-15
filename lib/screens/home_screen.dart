@@ -47,7 +47,7 @@ class HomeScreen extends StatelessWidget {
                   sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.95,
+                      childAspectRatio: 0.88,
                       crossAxisSpacing: 14,
                       mainAxisSpacing: 14,
                     ),
@@ -78,51 +78,43 @@ class _Header extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Column(
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppTheme.accent, AppTheme.accentSoft],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.directions_car_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppTheme.accent, AppTheme.accentSoft],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.directions_car_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'CarCat',
-                    style: TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
+              Text(
+                'CarCat',
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                  height: 1.1,
+                ),
               ),
-              const SizedBox(height: 4),
-              const Padding(
-                padding: EdgeInsets.only(left: 46),
-                child: Text(
-                  'Katalog Mobil Indonesia',
-                  style: TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 13,
-                  ),
+              Text(
+                'Katalog Mobil Indonesia',
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 11,
                 ),
               ),
             ],
@@ -300,158 +292,135 @@ class _BrandCard extends StatelessWidget {
         ),
         child: Hero(
           tag: 'brand-$brand',
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                colors: [info.primary, info.secondary],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: info.primary.withOpacity(0.18),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: info.primary.withOpacity(0.25),
-                  blurRadius: 14,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                // Decorative circles
-                Positioned(
-                  right: -30,
-                  top: -30,
-                  child: Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.08),
+              clipBehavior: Clip.hardEdge,
+              child: Column(
+                children: [
+                  // Logo area — fills most of the card
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: _BrandLogo(info: info),
                     ),
                   ),
-                ),
-                Positioned(
-                  right: 20,
-                  bottom: -20,
-                  child: Container(
-                    width: 70,
-                    height: 70,
+                  // Bottom strip with brand name + count
+                  Container(
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.05),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.18),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              info.country,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          ),
-                        ],
+                      gradient: LinearGradient(
+                        colors: [info.primary, info.secondary],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
                       ),
-                      Expanded(
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.18),
-                                  blurRadius: 14,
-                                  offset: const Offset(0, 4),
+                    ),
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                brand,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.3,
+                                  height: 1.1,
                                 ),
-                              ],
-                            ),
-                            child: SizedBox(
-                              width: 56,
-                              height: 56,
-                              child: CachedNetworkImage(
-                                imageUrl: info.logoUrl,
-                                fit: BoxFit.contain,
-                                placeholder: (_, __) => Center(
-                                  child: SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 1.5,
-                                      color: info.primary,
-                                    ),
-                                  ),
-                                ),
-                                errorWidget: (_, __, ___) => Text(
-                                  brand.substring(0, 1),
-                                  style: TextStyle(
-                                    color: info.primary,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                  ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '$carCount mobil',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.85),
+                                  fontSize: 10,
                                 ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              '$carCount mobil',
-                              style: TextStyle(
-                                color: info.primary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                        Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.22),
+                            shape: BoxShape.circle,
                           ),
-                          const Spacer(),
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.arrow_forward_rounded,
-                              color: Colors.white,
-                              size: 16,
-                            ),
+                          child: const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 14,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BrandLogo extends StatelessWidget {
+  final BrandInfo info;
+  const _BrandLogo({required this.info});
+
+  @override
+  Widget build(BuildContext context) {
+    return CachedNetworkImage(
+      imageUrl: info.logoUrl,
+      fit: BoxFit.contain,
+      placeholder: (_, __) => Center(
+        child: SizedBox(
+          width: 22,
+          height: 22,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: info.primary,
+          ),
+        ),
+      ),
+      errorWidget: (_, __, ___) => _LogoFallback(info: info),
+    );
+  }
+}
+
+class _LogoFallback extends StatelessWidget {
+  final BrandInfo info;
+  const _LogoFallback({required this.info});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          info.name.toUpperCase(),
+          style: TextStyle(
+            color: info.primary,
+            fontSize: 32,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -1,
           ),
         ),
       ),

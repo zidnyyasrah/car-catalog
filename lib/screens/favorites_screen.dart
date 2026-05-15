@@ -11,43 +11,99 @@ class FavoritesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.primary,
+      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Text(
-                'Favorit',
-                style: TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppTheme.accent.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.favorite_rounded,
+                      color: AppTheme.accent,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Favorit',
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const Spacer(),
+                  Consumer<CarProvider>(
+                    builder: (_, provider, __) => Text(
+                      '${provider.favoriteCars.length}',
+                      style: const TextStyle(
+                        color: AppTheme.textMuted,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 12),
             Expanded(
               child: Consumer<CarProvider>(
                 builder: (_, provider, __) {
                   final cars = provider.favoriteCars;
                   if (cars.isEmpty) {
-                    return const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.favorite_border, size: 64, color: AppTheme.textSecondary),
-                          SizedBox(height: 12),
-                          Text(
-                            'Belum ada favorit',
-                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Tap ikon hati untuk menyimpan mobil',
-                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                          ),
-                        ],
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(40),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: AppTheme.surface,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppTheme.border),
+                              ),
+                              child: const Icon(
+                                Icons.favorite_border,
+                                size: 36,
+                                color: AppTheme.textMuted,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Belum ada favorit',
+                              style: TextStyle(
+                                color: AppTheme.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Tap ikon hati pada mobil untuk\nmenyimpan ke favorit',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: AppTheme.textMuted,
+                                fontSize: 13,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   }
@@ -55,7 +111,7 @@ class FavoritesScreen extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.68,
+                      childAspectRatio: 0.66,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
@@ -66,7 +122,8 @@ class FavoritesScreen extends StatelessWidget {
                         car: car,
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => CarDetailScreen(car: car)),
+                          MaterialPageRoute(
+                              builder: (_) => CarDetailScreen(car: car)),
                         ),
                       );
                     },

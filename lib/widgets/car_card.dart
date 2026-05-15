@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../models/car.dart';
 import '../providers/car_provider.dart';
+import '../data/brand_info.dart';
 import '../theme/app_theme.dart';
 
 class CarCard extends StatelessWidget {
@@ -13,99 +14,123 @@ class CarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF2A2A4E), width: 1),
-        ),
-        clipBehavior: Clip.hardEdge,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _CarImage(car: car),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      _BodyTypeBadge(bodyType: car.bodyType),
-                      if (car.isElectric) ...[
-                        const SizedBox(width: 6),
-                        _ElectricBadge(),
+    final brand = brandInfoFor(car.brand);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppTheme.border),
+          ),
+          clipBehavior: Clip.hardEdge,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _CarImage(car: car, brandColor: brand.primary),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        _Badge(
+                          label: car.bodyType,
+                          color: brand.primary,
+                        ),
+                        if (car.isElectric) ...[
+                          const SizedBox(width: 6),
+                          const _Badge(
+                            label: 'EV',
+                            color: AppTheme.electric,
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    car.brand,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.5,
                     ),
-                  ),
-                  Text(
-                    '${car.type} ${car.variant}',
-                    style: const TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: 8),
+                    Text(
+                      car.type,
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        height: 1.1,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today_outlined,
-                          size: 12, color: AppTheme.textSecondary),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${car.year}',
-                        style: const TextStyle(
-                            color: AppTheme.textSecondary, fontSize: 12),
+                    const SizedBox(height: 2),
+                    Text(
+                      car.variant,
+                      style: const TextStyle(
+                        color: AppTheme.textMuted,
+                        fontSize: 11,
                       ),
-                      const SizedBox(width: 12),
-                      Icon(
-                        car.isElectric
-                            ? Icons.bolt_outlined
-                            : Icons.local_gas_station_outlined,
-                        size: 12,
-                        color: car.isElectric
-                            ? AppTheme.electric
-                            : AppTheme.textSecondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        car.fuelConsumptionLabel,
-                        style: TextStyle(
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          car.isElectric
+                              ? Icons.bolt_rounded
+                              : Icons.local_gas_station_outlined,
+                          size: 12,
                           color: car.isElectric
                               ? AppTheme.electric
-                              : AppTheme.textSecondary,
+                              : AppTheme.textMuted,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          car.fuelConsumptionLabel,
+                          style: TextStyle(
+                            color: car.isElectric
+                                ? AppTheme.electric
+                                : AppTheme.textMuted,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Icon(Icons.people_outline,
+                            size: 12, color: AppTheme.textMuted),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${car.seatingCapacity}',
+                          style: const TextStyle(
+                            color: AppTheme.textMuted,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: brand.primary.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        car.priceLabel,
+                        style: TextStyle(
+                          color: brand.primary,
                           fontSize: 12,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    car.priceLabel,
-                    style: const TextStyle(
-                      color: AppTheme.accent,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -114,7 +139,8 @@ class CarCard extends StatelessWidget {
 
 class _CarImage extends StatelessWidget {
   final Car car;
-  const _CarImage({required this.car});
+  final Color brandColor;
+  const _CarImage({required this.car, required this.brandColor});
 
   @override
   Widget build(BuildContext context) {
@@ -122,21 +148,25 @@ class _CarImage extends StatelessWidget {
       children: [
         AspectRatio(
           aspectRatio: 16 / 10,
-          child: CachedNetworkImage(
-            imageUrl: car.imageUrl,
-            fit: BoxFit.cover,
-            placeholder: (_, __) => Container(
-              color: AppTheme.cardBg,
-              child: const Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppTheme.accent,
+          child: Hero(
+            tag: 'car-image-${car.id}',
+            child: CachedNetworkImage(
+              imageUrl: car.imageUrl,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(
+                color: AppTheme.surfaceElevated,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: brandColor,
+                  ),
                 ),
               ),
-            ),
-            errorWidget: (_, __, ___) => Container(
-              color: AppTheme.cardBg,
-              child: const Icon(Icons.directions_car, color: AppTheme.textSecondary, size: 40),
+              errorWidget: (_, __, ___) => Container(
+                color: AppTheme.surfaceElevated,
+                child: const Icon(Icons.directions_car,
+                    color: AppTheme.textMuted, size: 40),
+              ),
             ),
           ),
         ),
@@ -144,6 +174,26 @@ class _CarImage extends StatelessWidget {
           top: 8,
           right: 8,
           child: _FavoriteButton(carId: car.id),
+        ),
+        Positioned(
+          left: 8,
+          bottom: 8,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.55),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '${car.year}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -158,67 +208,46 @@ class _FavoriteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<CarProvider>();
     final isFav = provider.isFavorite(carId);
-    return GestureDetector(
-      onTap: () => provider.toggleFavorite(carId),
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: AppTheme.primary.withOpacity(0.7),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          isFav ? Icons.favorite : Icons.favorite_border,
-          size: 18,
-          color: isFav ? AppTheme.accent : AppTheme.textSecondary,
+    return Material(
+      color: Colors.black.withOpacity(0.55),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => provider.toggleFavorite(carId),
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(
+            isFav ? Icons.favorite : Icons.favorite_border,
+            size: 16,
+            color: isFav ? AppTheme.accent : Colors.white,
+          ),
         ),
       ),
     );
   }
 }
 
-class _BodyTypeBadge extends StatelessWidget {
-  final String bodyType;
-  const _BodyTypeBadge({required this.bodyType});
+class _Badge extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _Badge({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: AppTheme.accent.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppTheme.accent.withOpacity(0.4), width: 0.5),
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.withOpacity(0.4), width: 0.5),
       ),
       child: Text(
-        bodyType,
-        style: const TextStyle(
-          color: AppTheme.accent,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-}
-
-class _ElectricBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: AppTheme.electric.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppTheme.electric.withOpacity(0.4), width: 0.5),
-      ),
-      child: const Text(
-        'EV',
+        label,
         style: TextStyle(
-          color: AppTheme.electric,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
+          color: color,
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
         ),
       ),
     );

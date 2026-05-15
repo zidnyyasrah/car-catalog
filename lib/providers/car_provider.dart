@@ -8,6 +8,7 @@ class CarProvider extends ChangeNotifier {
   final _repo = CarRepository();
 
   CarFilter _filter = const CarFilter();
+  List<Car> _allCars = [];
   List<Car> _cars = [];
   final Set<String> _favorites = {};
   bool _loading = true;
@@ -16,25 +17,36 @@ class CarProvider extends ChangeNotifier {
   List<String> brands = [];
   List<String> bodyTypes = [];
   List<String> driveSystems = [];
+  Map<String, int> brandCounts = {};
   static const transmissions = ['Manual', 'Automatic', 'CVT'];
 
   CarFilter get filter => _filter;
   List<Car> get cars => _cars;
+  List<Car> get allCars => _allCars;
   bool get loading => _loading;
   String? get error => _error;
+  int get totalCars => _allCars.length;
+  int get totalElectric => _allCars.where((c) => c.isElectric).length;
 
   List<Car> get favoriteCars =>
-      _cars.where((c) => _favorites.contains(c.id)).toList();
+      _allCars.where((c) => _favorites.contains(c.id)).toList();
 
   bool isFavorite(String id) => _favorites.contains(id);
+
+  List<Car> carsForBrand(String brand) =>
+      _allCars.where((c) => c.brand == brand).toList();
 
   Future<void> init() async {
     try {
       await _repo.seedIfEmpty(dummyCars);
+      _allCars = await _repo.getFiltered(const CarFilter());
+      brandCounts = _computeBrandCounts(_allCars);
       brands = await _repo.getDistinctBrands();
       bodyTypes = await _repo.getDistinctBodyTypes();
       driveSystems = await _repo.getDistinctDriveSystems();
-      await _reload();
+      _cars = _allCars;
+      _loading = false;
+      notifyListeners();
     } catch (e) {
       _error = e.toString();
       _loading = false;
@@ -72,5 +84,13 @@ class CarProvider extends ChangeNotifier {
     _cars = await _repo.getFiltered(_filter);
     _loading = false;
     notifyListeners();
+  }
+
+  Map<String, int> _computeBrandCounts(List<Car> cars) {
+    final counts = <String, int>{};
+    for (final car in cars) {
+      counts[car.brand] = (counts[car.brand] ?? 0) + 1;
+    }
+    return counts;
   }
 }

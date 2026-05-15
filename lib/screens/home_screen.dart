@@ -1,25 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/car_provider.dart';
-import '../widgets/car_card.dart';
-import '../widgets/filter_bottom_sheet.dart';
+import '../data/brand_info.dart';
 import '../theme/app_theme.dart';
-import 'car_detail_screen.dart';
+import 'brand_cars_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
+      backgroundColor: AppTheme.background,
       body: SafeArea(
-        child: Column(
-          children: [
-            _Header(),
-            _SearchBar(),
-            _ActiveFiltersRow(),
-            Expanded(child: _CarGrid()),
-          ],
+        child: Consumer<CarProvider>(
+          builder: (_, provider, __) {
+            if (provider.loading) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: AppTheme.accent,
+                  strokeWidth: 2,
+                ),
+              );
+            }
+            if (provider.error != null) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    'Error: ${provider.error}',
+                    style: const TextStyle(color: AppTheme.accent),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }
+
+            return CustomScrollView(
+              slivers: [
+                const SliverToBoxAdapter(child: _Header()),
+                SliverToBoxAdapter(child: _StatsRow(provider: provider)),
+                const SliverToBoxAdapter(child: _SectionTitle('Pilih Brand')),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.95,
+                      crossAxisSpacing: 14,
+                      mainAxisSpacing: 14,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final brand = provider.brands[index];
+                        final count = provider.brandCounts[brand] ?? 0;
+                        return _BrandCard(brand: brand, carCount: count);
+                      },
+                      childCount: provider.brands.length,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -32,36 +75,56 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'CarCat',
-                style: TextStyle(
-                  color: AppTheme.accent,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppTheme.accent, AppTheme.accentSoft],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.directions_car_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'CarCat',
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Padding(
+                padding: EdgeInsets.only(left: 46),
+                child: Text(
+                  'Katalog Mobil Indonesia',
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                  ),
                 ),
               ),
-              Text(
-                'Katalog Mobil Indonesia',
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
-              ),
             ],
-          ),
-          const Spacer(),
-          Consumer<CarProvider>(
-            builder: (_, provider, __) {
-              if (provider.loading) return const SizedBox.shrink();
-              return Text(
-                '${provider.cars.length} mobil',
-                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-              );
-            },
           ),
         ],
       ),
@@ -69,71 +132,41 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
-  const _SearchBar();
+class _StatsRow extends StatelessWidget {
+  final CarProvider provider;
+  const _StatsRow({required this.provider});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              onChanged: context.read<CarProvider>().updateSearch,
-              style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
-              decoration: InputDecoration(
-                hintText: 'Cari brand, model, varian...',
-                prefixIcon:
-                    const Icon(Icons.search, color: AppTheme.textSecondary, size: 20),
-                suffixIcon: Consumer<CarProvider>(
-                  builder: (_, provider, __) {
-                    if (provider.filter.searchQuery.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-                    return IconButton(
-                      icon: const Icon(Icons.clear,
-                          color: AppTheme.textSecondary, size: 18),
-                      onPressed: () => provider.updateSearch(''),
-                    );
-                  },
-                ),
-              ),
+            child: _StatChip(
+              label: 'Brand',
+              value: '${provider.brands.length}',
+              icon: Icons.business_outlined,
+              color: AppTheme.accent,
             ),
           ),
           const SizedBox(width: 10),
-          Consumer<CarProvider>(
-            builder: (_, provider, __) {
-              final hasFilters = provider.filter.hasActiveFilters;
-              return GestureDetector(
-                onTap: () => showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) => ChangeNotifierProvider.value(
-                    value: provider,
-                    child: const FilterBottomSheet(),
-                  ),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: hasFilters
-                        ? AppTheme.accent.withOpacity(0.15)
-                        : AppTheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: hasFilters ? AppTheme.accent : const Color(0xFF2A2A4E),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.tune,
-                    color: hasFilters ? AppTheme.accent : AppTheme.textSecondary,
-                    size: 20,
-                  ),
-                ),
-              );
-            },
+          Expanded(
+            child: _StatChip(
+              label: 'Mobil',
+              value: '${provider.totalCars}',
+              icon: Icons.directions_car_outlined,
+              color: AppTheme.gold,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _StatChip(
+              label: 'Listrik',
+              value: '${provider.totalElectric}',
+              icon: Icons.bolt_outlined,
+              color: AppTheme.electric,
+            ),
           ),
         ],
       ),
@@ -141,107 +174,61 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-class _ActiveFiltersRow extends StatelessWidget {
-  const _ActiveFiltersRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<CarProvider>(
-      builder: (_, provider, __) {
-        final filter = provider.filter;
-        final chips = <_FilterChipData>[];
-
-        if (filter.brand != null) {
-          chips.add(_FilterChipData(
-            label: filter.brand!,
-            onRemove: () => provider.updateFilter(filter.copyWith(clearBrand: true)),
-          ));
-        }
-        if (filter.bodyType != null) {
-          chips.add(_FilterChipData(
-            label: filter.bodyType!,
-            onRemove: () => provider.updateFilter(filter.copyWith(clearBodyType: true)),
-          ));
-        }
-        if (filter.transmission != null) {
-          chips.add(_FilterChipData(
-            label: filter.transmission!,
-            onRemove: () =>
-                provider.updateFilter(filter.copyWith(clearTransmission: true)),
-          ));
-        }
-        if (filter.driveSystem != null) {
-          chips.add(_FilterChipData(
-            label: filter.driveSystem!,
-            onRemove: () =>
-                provider.updateFilter(filter.copyWith(clearDriveSystem: true)),
-          ));
-        }
-
-        if (chips.isEmpty) return const SizedBox.shrink();
-
-        return SizedBox(
-          height: 36,
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            scrollDirection: Axis.horizontal,
-            children: [
-              ...chips.map((chip) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: _ActiveChip(data: chip),
-                  )),
-              GestureDetector(
-                onTap: provider.clearFilters,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF2A2A4E)),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Hapus semua',
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _FilterChipData {
+class _StatChip extends StatelessWidget {
   final String label;
-  final VoidCallback onRemove;
-  const _FilterChipData({required this.label, required this.onRemove});
-}
+  final String value;
+  final IconData icon;
+  final Color color;
 
-class _ActiveChip extends StatelessWidget {
-  final _FilterChipData data;
-  const _ActiveChip({required this.data});
+  const _StatChip({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.accent.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.accent.withOpacity(0.4)),
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(data.label,
-              style: const TextStyle(color: AppTheme.accent, fontSize: 12)),
-          const SizedBox(width: 4),
-          GestureDetector(
-            onTap: data.onRemove,
-            child: const Icon(Icons.close, size: 14, color: AppTheme.accent),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  height: 1.1,
+                ),
+              ),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: AppTheme.textMuted,
+                  fontSize: 11,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -249,76 +236,200 @@ class _ActiveChip extends StatelessWidget {
   }
 }
 
-class _CarGrid extends StatelessWidget {
-  const _CarGrid();
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle(this.title);
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CarProvider>(
-      builder: (_, provider, __) {
-        if (provider.loading) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: AppTheme.accent,
-              strokeWidth: 2,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 20,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppTheme.accent, AppTheme.accentSoft],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: BorderRadius.circular(2),
             ),
-          );
-        }
-
-        if (provider.error != null) {
-          return Center(
-            child: Text(
-              'Error: ${provider.error}',
-              style: const TextStyle(color: AppTheme.accent),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
             ),
-          );
-        }
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-        final cars = provider.cars;
+class _BrandCard extends StatelessWidget {
+  final String brand;
+  final int carCount;
 
-        if (cars.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.directions_car_outlined,
-                    size: 64, color: AppTheme.textSecondary),
-                SizedBox(height: 12),
-                Text(
-                  'Tidak ada mobil ditemukan',
-                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Coba ubah filter pencarian',
-                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+  const _BrandCard({required this.brand, required this.carCount});
+
+  @override
+  Widget build(BuildContext context) {
+    final info = brandInfoFor(brand);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => Navigator.push(
+          context,
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 350),
+            pageBuilder: (_, anim, __) => BrandCarsScreen(brand: brand),
+            transitionsBuilder: (_, anim, __, child) {
+              return FadeTransition(opacity: anim, child: child);
+            },
+          ),
+        ),
+        child: Hero(
+          tag: 'brand-$brand',
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                colors: [info.primary, info.secondary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: info.primary.withOpacity(0.25),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
-          );
-        }
-
-        return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.68,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            child: Stack(
+              children: [
+                // Decorative circles
+                Positioned(
+                  right: -30,
+                  top: -30,
+                  child: Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.08),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 20,
+                  bottom: -20,
+                  child: Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.05),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              info.country,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Text(
+                        brand,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                          height: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Sejak ${info.foundedYear}',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.75),
+                          fontSize: 11,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '$carCount mobil',
+                              style: TextStyle(
+                                color: info.primary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_forward_rounded,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          itemCount: cars.length,
-          itemBuilder: (context, index) {
-            final car = cars[index];
-            return CarCard(
-              car: car,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => CarDetailScreen(car: car)),
-              ),
-            );
-          },
-        );
-      },
+        ),
+      ),
     );
   }
 }

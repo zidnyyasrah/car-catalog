@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../providers/car_provider.dart';
 import '../data/brand_info.dart';
@@ -343,7 +344,7 @@ class _BrandCard extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -368,26 +369,50 @@ class _BrandCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const Spacer(),
-                      Text(
-                        brand,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                          height: 1,
+                      Expanded(
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.18),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: SizedBox(
+                              width: 56,
+                              height: 56,
+                              child: CachedNetworkImage(
+                                imageUrl: info.logoUrl,
+                                fit: BoxFit.contain,
+                                placeholder: (_, __) => Center(
+                                  child: SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1.5,
+                                      color: info.primary,
+                                    ),
+                                  ),
+                                ),
+                                errorWidget: (_, __, ___) => Text(
+                                  brand.substring(0, 1),
+                                  style: TextStyle(
+                                    color: info.primary,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Sejak ${info.foundedYear}',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.75),
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                       Row(
                         children: [
                           Container(

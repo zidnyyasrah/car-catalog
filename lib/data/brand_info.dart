@@ -7,6 +7,7 @@ class BrandInfo {
   final Color primary;
   final Color secondary;
   final String tagline;
+  final String logoUrl;
 
   const BrandInfo({
     required this.name,
@@ -15,6 +16,7 @@ class BrandInfo {
     required this.primary,
     required this.secondary,
     required this.tagline,
+    required this.logoUrl,
   });
 }
 
@@ -26,6 +28,8 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFEB0A1E),
     secondary: Color(0xFF8B0010),
     tagline: 'Let\'s Go Places',
+    logoUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Toyota_carlogo.svg/512px-Toyota_carlogo.svg.png',
   ),
   'Honda': BrandInfo(
     name: 'Honda',
@@ -34,6 +38,8 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFE40521),
     secondary: Color(0xFF8B0012),
     tagline: 'The Power of Dreams',
+    logoUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Honda.svg/512px-Honda.svg.png',
   ),
   'Daihatsu': BrandInfo(
     name: 'Daihatsu',
@@ -42,6 +48,8 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFF005EB8),
     secondary: Color(0xFF003B71),
     tagline: 'Sahabatku Daihatsu',
+    logoUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Daihatsu_logo.svg/512px-Daihatsu_logo.svg.png',
   ),
   'Mitsubishi': BrandInfo(
     name: 'Mitsubishi',
@@ -50,6 +58,8 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFE60012),
     secondary: Color(0xFF8B000B),
     tagline: 'Drive Your Ambition',
+    logoUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Mitsubishi_logo.svg/512px-Mitsubishi_logo.svg.png',
   ),
   'Suzuki': BrandInfo(
     name: 'Suzuki',
@@ -58,6 +68,8 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFE60012),
     secondary: Color(0xFF003595),
     tagline: 'Way of Life!',
+    logoUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Suzuki_logo_2.svg/512px-Suzuki_logo_2.svg.png',
   ),
   'Hyundai': BrandInfo(
     name: 'Hyundai',
@@ -66,6 +78,8 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFF002C5F),
     secondary: Color(0xFF00AAD2),
     tagline: 'New Thinking. New Possibilities.',
+    logoUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Hyundai_Motor_Company_logo.svg/512px-Hyundai_Motor_Company_logo.svg.png',
   ),
   'Kia': BrandInfo(
     name: 'Kia',
@@ -74,6 +88,8 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFBB162B),
     secondary: Color(0xFF05141F),
     tagline: 'Movement that inspires',
+    logoUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/KIA_logo3.svg/512px-KIA_logo3.svg.png',
   ),
   'Wuling': BrandInfo(
     name: 'Wuling',
@@ -82,6 +98,8 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFC8102E),
     secondary: Color(0xFF5C0A1A),
     tagline: 'Drive for a Better Life',
+    logoUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Wuling_Motors_logo.svg/512px-Wuling_Motors_logo.svg.png',
   ),
 };
 
@@ -94,4 +112,5 @@ BrandInfo brandInfoFor(String name) =>
       primary: Color(0xFF666666),
       secondary: Color(0xFF333333),
       tagline: '',
+      logoUrl: '',
     );

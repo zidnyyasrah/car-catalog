@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../models/car.dart';
 import '../providers/car_provider.dart';
@@ -213,59 +214,108 @@ class _BrandHeader extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          info.country,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        brand,
-                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 38,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                          height: 1,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.22),
+                              blurRadius: 18,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: CachedNetworkImage(
+                            imageUrl: info.logoUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (_, __) => Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: info.primary,
+                                ),
+                              ),
+                            ),
+                            errorWidget: (_, __, ___) => Text(
+                              brand.substring(0, 1),
+                              style: TextStyle(
+                                color: info.primary,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        info.tagline,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.85),
-                          fontSize: 13,
-                          fontStyle: FontStyle.italic,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                info.country,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              brand,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
+                                height: 1,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              info.tagline,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 11,
+                                fontStyle: FontStyle.italic,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                _HeaderPill(
+                                  icon: Icons.directions_car_rounded,
+                                  label: '$count mobil',
+                                ),
+                                const SizedBox(width: 6),
+                                _HeaderPill(
+                                  icon: Icons.history_rounded,
+                                  label: 'Sejak ${info.foundedYear}',
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          _HeaderPill(
-                            icon: Icons.directions_car_rounded,
-                            label: '$count mobil',
-                          ),
-                          const SizedBox(width: 8),
-                          _HeaderPill(
-                            icon: Icons.history_rounded,
-                            label: 'Sejak ${info.foundedYear}',
-                          ),
-                        ],
                       ),
                     ],
                   ),

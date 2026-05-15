@@ -7,7 +7,7 @@ class BrandInfo {
   final Color primary;
   final Color secondary;
   final String tagline;
-  final String logoUrl;
+  final String? logoAsset;
 
   const BrandInfo({
     required this.name,
@@ -16,9 +16,11 @@ class BrandInfo {
     required this.primary,
     required this.secondary,
     required this.tagline,
-    required this.logoUrl,
+    this.logoAsset,
   });
 }
+
+const _basePath = 'lib/data/brand-logo';
 
 const Map<String, BrandInfo> brandInfo = {
   'Toyota': BrandInfo(
@@ -28,7 +30,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFEB0A1E),
     secondary: Color(0xFF8B0010),
     tagline: 'Let\'s Go Places',
-    logoUrl: 'https://logo.clearbit.com/toyota.com',
+    logoAsset: '$_basePath/toyota-svgrepo-com.svg',
   ),
   'Honda': BrandInfo(
     name: 'Honda',
@@ -37,7 +39,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFE40521),
     secondary: Color(0xFF8B0012),
     tagline: 'The Power of Dreams',
-    logoUrl: 'https://logo.clearbit.com/honda.com',
+    logoAsset: '$_basePath/honda-svgrepo-com.svg',
   ),
   'Daihatsu': BrandInfo(
     name: 'Daihatsu',
@@ -46,7 +48,6 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFF005EB8),
     secondary: Color(0xFF003B71),
     tagline: 'Sahabatku Daihatsu',
-    logoUrl: 'https://logo.clearbit.com/daihatsu.com',
   ),
   'Mitsubishi': BrandInfo(
     name: 'Mitsubishi',
@@ -55,7 +56,6 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFE60012),
     secondary: Color(0xFF8B000B),
     tagline: 'Drive Your Ambition',
-    logoUrl: 'https://logo.clearbit.com/mitsubishi-motors.com',
   ),
   'Suzuki': BrandInfo(
     name: 'Suzuki',
@@ -64,7 +64,6 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFE60012),
     secondary: Color(0xFF003595),
     tagline: 'Way of Life!',
-    logoUrl: 'https://logo.clearbit.com/globalsuzuki.com',
   ),
   'Hyundai': BrandInfo(
     name: 'Hyundai',
@@ -73,7 +72,6 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFF002C5F),
     secondary: Color(0xFF00AAD2),
     tagline: 'New Thinking. New Possibilities.',
-    logoUrl: 'https://logo.clearbit.com/hyundai.com',
   ),
   'Kia': BrandInfo(
     name: 'Kia',
@@ -82,7 +80,6 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFBB162B),
     secondary: Color(0xFF05141F),
     tagline: 'Movement that inspires',
-    logoUrl: 'https://logo.clearbit.com/kia.com',
   ),
   'Wuling': BrandInfo(
     name: 'Wuling',
@@ -91,7 +88,6 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFC8102E),
     secondary: Color(0xFF5C0A1A),
     tagline: 'Drive for a Better Life',
-    logoUrl: 'https://logo.clearbit.com/wuling.id',
   ),
 };
 
@@ -104,5 +100,4 @@ BrandInfo brandInfoFor(String name) =>
       primary: Color(0xFF666666),
       secondary: Color(0xFF333333),
       tagline: '',
-      logoUrl: '',
     );

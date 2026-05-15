@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../models/car.dart';
 import '../providers/car_provider.dart';
 import '../data/brand_info.dart';
 import '../widgets/car_card.dart';
+import '../widgets/brand_logo.dart';
 import '../theme/app_theme.dart';
 import 'car_detail_screen.dart';
 
@@ -208,34 +208,7 @@ class _BrandHeader extends StatelessWidget {
                       child: SizedBox(
                         width: 72,
                         height: 72,
-                        child: CachedNetworkImage(
-                          imageUrl: info.logoUrl,
-                          fit: BoxFit.contain,
-                          placeholder: (_, __) => Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.5,
-                                color: info.primary,
-                              ),
-                            ),
-                          ),
-                          errorWidget: (_, __, ___) => Center(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                brand.toUpperCase(),
-                                style: TextStyle(
-                                  color: info.primary,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        child: BrandLogo(info: info, fallbackFontSize: 22),
                       ),
                     ),
                     const SizedBox(width: 16),

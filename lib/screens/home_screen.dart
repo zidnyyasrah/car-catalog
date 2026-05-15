@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../providers/car_provider.dart';
 import '../data/brand_info.dart';
 import '../theme/app_theme.dart';
+import '../widgets/brand_logo.dart';
 import 'brand_cars_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -313,7 +313,7 @@ class _BrandCard extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(18),
-                      child: _BrandLogo(info: info),
+                      child: BrandLogo(info: info, fallbackFontSize: 32),
                     ),
                   ),
                   // Bottom strip with brand name + count
@@ -381,49 +381,3 @@ class _BrandCard extends StatelessWidget {
   }
 }
 
-class _BrandLogo extends StatelessWidget {
-  final BrandInfo info;
-  const _BrandLogo({required this.info});
-
-  @override
-  Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      imageUrl: info.logoUrl,
-      fit: BoxFit.contain,
-      placeholder: (_, __) => Center(
-        child: SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: info.primary,
-          ),
-        ),
-      ),
-      errorWidget: (_, __, ___) => _LogoFallback(info: info),
-    );
-  }
-}
-
-class _LogoFallback extends StatelessWidget {
-  final BrandInfo info;
-  const _LogoFallback({required this.info});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          info.name.toUpperCase(),
-          style: TextStyle(
-            color: info.primary,
-            fontSize: 32,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1,
-          ),
-        ),
-      ),
-    );
-  }
-}

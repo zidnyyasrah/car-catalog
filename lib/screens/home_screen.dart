@@ -14,6 +14,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
+        bottom: false,
         child: Consumer<CarProvider>(
           builder: (_, provider, __) {
             if (provider.loading) {
@@ -27,7 +28,7 @@ class HomeScreen extends StatelessWidget {
             if (provider.error != null) {
               return Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(AppTheme.xl),
                   child: Text(
                     'Error: ${provider.error}',
                     style: const TextStyle(color: AppTheme.accent),
@@ -39,17 +40,17 @@ class HomeScreen extends StatelessWidget {
 
             return CustomScrollView(
               slivers: [
-                const SliverToBoxAdapter(child: _Header()),
-                SliverToBoxAdapter(child: _StatsRow(provider: provider)),
-                const SliverToBoxAdapter(child: _SectionTitle('Pilih Brand')),
+                const SliverToBoxAdapter(child: _DisplayHeading()),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(
+                      AppTheme.xl, AppTheme.sm, AppTheme.xl, 120),
                   sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.88,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
+                      childAspectRatio: 0.92,
+                      crossAxisSpacing: AppTheme.md,
+                      mainAxisSpacing: AppTheme.md,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -70,54 +71,21 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header();
+class _DisplayHeading extends StatelessWidget {
+  const _DisplayHeading();
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(
+          AppTheme.xl, AppTheme.xxl, AppTheme.xl, AppTheme.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.accent, AppTheme.accentSoft],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.directions_car_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'CarCat',
-                style: TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                  height: 1.1,
-                ),
-              ),
-              Text(
-                'Katalog Mobil Indonesia',
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 11,
-                ),
-              ),
-            ],
+          Text('Katalog mobil', style: AppTheme.display(size: 44)),
+          Text(
+            'Indonesia.',
+            style: AppTheme.display(color: AppTheme.accent, size: 44),
           ),
         ],
       ),
@@ -125,103 +93,78 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _StatsRow extends StatelessWidget {
+class _StatStrip extends StatelessWidget {
   final CarProvider provider;
-  const _StatsRow({required this.provider});
+  const _StatStrip({required this.provider});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      padding: const EdgeInsets.fromLTRB(
+          AppTheme.xl, AppTheme.xl, AppTheme.xl, 0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Expanded(
-            child: _StatChip(
-              label: 'Brand',
-              value: '${provider.brands.length}',
-              icon: Icons.business_outlined,
-              color: AppTheme.accent,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _StatChip(
-              label: 'Mobil',
-              value: '${provider.totalCars}',
-              icon: Icons.directions_car_outlined,
-              color: AppTheme.gold,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _StatChip(
-              label: 'Listrik',
-              value: '${provider.totalElectric}',
-              icon: Icons.bolt_outlined,
-              color: AppTheme.electric,
-            ),
-          ),
+          _BigStat(value: '${provider.brands.length}', label: 'BRAND'),
+          const SizedBox(width: AppTheme.xl),
+          Container(width: 1, height: 56, color: AppTheme.hairline),
+          const SizedBox(width: AppTheme.xl),
+          _BigStat(value: '${provider.totalCars}', label: 'MOBIL'),
+          const Spacer(),
+          _ElectricBadge(count: provider.totalElectric),
         ],
       ),
     );
   }
 }
 
-class _StatChip extends StatelessWidget {
-  final String label;
+class _BigStat extends StatelessWidget {
   final String value;
-  final IconData icon;
-  final Color color;
+  final String label;
 
-  const _StatChip({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
+  const _BigStat({required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(value, style: AppTheme.numeral(size: 48)),
+        const SizedBox(height: AppTheme.sx),
+        Text(label, style: AppTheme.eyebrow()),
+      ],
+    );
+  }
+}
+
+class _ElectricBadge extends StatelessWidget {
+  final int count;
+  const _ElectricBadge({required this.count});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.md, vertical: AppTheme.sm),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.border),
+        color: AppTheme.electric.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppTheme.electric.withOpacity(0.3)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(8),
+          const Icon(Icons.bolt_rounded, size: 14, color: AppTheme.electric),
+          const SizedBox(width: AppTheme.sx),
+          Text(
+            '$count EV',
+            style: const TextStyle(
+              color: AppTheme.electric,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
             ),
-            child: Icon(icon, size: 18, color: color),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  height: 1.1,
-                ),
-              ),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppTheme.textMuted,
-                  fontSize: 11,
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -229,37 +172,25 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  const _SectionTitle(this.title);
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  final String? count;
+
+  const _SectionLabel({required this.label, this.count});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+      padding: const EdgeInsets.fromLTRB(AppTheme.xl, 0, AppTheme.xl, 0),
       child: Row(
         children: [
-          Container(
-            width: 4,
-            height: 20,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.accent, AppTheme.accentSoft],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            title,
-            style: const TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          Text(label, style: AppTheme.eyebrow(color: AppTheme.textPrimary)),
+          const SizedBox(width: AppTheme.md),
+          Expanded(child: Container(height: 1, color: AppTheme.hairline)),
+          if (count != null) ...[
+            const SizedBox(width: AppTheme.md),
+            Text(count!, style: AppTheme.eyebrow()),
+          ],
         ],
       ),
     );
@@ -279,11 +210,11 @@ class _BrandCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         onTap: () => Navigator.push(
           context,
           PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 350),
+            transitionDuration: AppTheme.motionSlow,
             pageBuilder: (_, anim, __) => BrandCarsScreen(brand: brand),
             transitionsBuilder: (_, anim, __, child) {
               return FadeTransition(opacity: anim, child: child);
@@ -294,25 +225,48 @@ class _BrandCard extends StatelessWidget {
           tag: 'brand-$brand',
           child: Material(
             color: Colors.transparent,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppTheme.surface.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppTheme.hairline),
+              ),
+              padding: const EdgeInsets.fromLTRB(
+                  AppTheme.md, AppTheme.lg, AppTheme.md, AppTheme.md),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: BrandLogo(
-                      info: info,
-                      tint: AppTheme.textPrimary,
-                      fallbackFontSize: 32,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.sm, vertical: AppTheme.sm),
+                      child: BrandLogo(
+                        info: info,
+                        tint: AppTheme.textPrimary,
+                        fallbackFontSize: 28,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '$carCount mobil',
-                    style: const TextStyle(
-                      color: AppTheme.textMuted,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  const SizedBox(height: AppTheme.md),
+                  Container(height: 1, color: AppTheme.hairline),
+                  const SizedBox(height: AppTheme.md),
+                  Row(
+                    children: [
+                      Text(
+                        brand.toUpperCase(),
+                        style: const TextStyle(
+                          color: AppTheme.textPrimary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        carCount.toString().padLeft(2, '0'),
+                        style: AppTheme.eyebrow(),
+                      ),
+                    ],
                   ),
                 ],
               ),

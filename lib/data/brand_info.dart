@@ -33,7 +33,6 @@ const Map<String, BrandInfo> brandInfo = {
     secondary: Color(0xFF8B0010),
     tagline: 'Let\'s Go Places',
     logoAsset: '$_basePath/toyota-svgrepo-com.svg',
-    logoScale: 1.45,
   ),
   'Honda': BrandInfo(
     name: 'Honda',
@@ -43,7 +42,6 @@ const Map<String, BrandInfo> brandInfo = {
     secondary: Color(0xFF8B0012),
     tagline: 'The Power of Dreams',
     logoAsset: '$_basePath/honda-svgrepo-com.svg',
-    logoScale: 1.3,
   ),
   'Daihatsu': BrandInfo(
     name: 'Daihatsu',

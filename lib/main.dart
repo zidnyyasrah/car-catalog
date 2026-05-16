@@ -6,6 +6,7 @@ import 'providers/car_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/favorites_screen.dart';
 import 'theme/app_theme.dart';
+import 'widgets/floating_nav.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,22 +59,23 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: FloatingNav(
         currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+        onChanged: (i) => setState(() => _currentIndex = i),
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.directions_car_outlined),
-            activeIcon: Icon(Icons.directions_car),
+          FloatingNavItem(
+            icon: Icons.grid_view_rounded,
+            activeIcon: Icons.grid_view_rounded,
             label: 'Katalog',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            activeIcon: Icon(Icons.favorite),
+          FloatingNavItem(
+            icon: Icons.favorite_border_rounded,
+            activeIcon: Icons.favorite_rounded,
             label: 'Favorit',
           ),
         ],

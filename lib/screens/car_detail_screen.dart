@@ -209,7 +209,7 @@ class _TitleBlock extends StatelessWidget {
             const SizedBox(width: AppTheme.md),
             Container(width: 1, height: 10, color: AppTheme.hairline),
             const SizedBox(width: AppTheme.md),
-            Text('${car.year}', style: AppTheme.eyebrow()),
+            Text(car.yearLabel, style: AppTheme.eyebrow()),
             const SizedBox(width: AppTheme.md),
             Container(width: 1, height: 10, color: AppTheme.hairline),
             const SizedBox(width: AppTheme.md),

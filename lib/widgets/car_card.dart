@@ -131,7 +131,7 @@ class _CarImage extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  '${car.year}',
+                  car.yearLabel.toUpperCase(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10.5,

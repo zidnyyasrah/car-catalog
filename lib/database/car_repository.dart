@@ -1,147 +1,177 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/car.dart';
-import '../models/car_filter.dart';
+import '../models/car_generation.dart';
+import '../models/car_model.dart';
 
+/// Fetches the brand → model → generation → variant hierarchy from Supabase
+/// in a single nested PostgREST query, then builds Dart objects.
+///
+/// Schema expected:
+///   brands(id, name, country)
+///   models(id, brand_id, name, body_type, description, hero_image_url)
+///   generations(id, model_id, name, chassis_code, year_start, year_end,
+///               description, hero_image_url)
+///   variants(id, generation_id, trim_name, year_start, year_end,
+///            engine_type, engine_displacement_cc, power_hp, torque_nm,
+///            transmission, drive_system, is_electric,
+///            fuel_consumption_km_per_l, seating_capacity,
+///            ground_clearance_mm, dimensions, safety_rating,
+///            price_min_million_idr, price_max_million_idr,
+///            image_url, description)
+///   variant_colors(variant_id, color)
+///   variant_features(variant_id, feature)
 class CarRepository {
   SupabaseClient get _db => Supabase.instance.client;
 
-  // ── Seed ──────────────────────────────────────────────────────────────────
+  /// One-shot fetch of everything. The dataset is small enough that we hydrate
+  /// the full hierarchy client-side and group from there.
+  Future<List<Car>> fetchAllVariants() async {
+    final rows = await _db.from('variants').select('''
+      id, trim_name, year_start, year_end,
+      engine_type, engine_displacement_cc, power_hp, torque_nm,
+      transmission, drive_system, is_electric,
+      fuel_consumption_km_per_l, seating_capacity,
+      ground_clearance_mm, dimensions, safety_rating,
+      price_min_million_idr, price_max_million_idr,
+      image_url, description,
+      generations!inner (
+        id, name, chassis_code, year_start, year_end,
+        description, hero_image_url,
+        models!inner (
+          id, name, body_type, description, hero_image_url,
+          brands!inner ( id, name, country )
+        )
+      ),
+      variant_colors ( color ),
+      variant_features ( feature )
+    ''');
 
-  Future<void> seedIfEmpty(List<Car> cars) async {
-    final existing = await _db.from('cars').select('id').limit(1);
-    if (existing.isNotEmpty) return;
-
-    // Insert cars
-    await _db.from('cars').insert(cars.map(_carToRow).toList());
-
-    // Insert colors (batch)
-    final colors = cars
-        .expand((c) => c.colors.map((color) => {'car_id': c.id, 'color': color}))
-        .toList();
-    await _db.from('car_colors').insert(colors);
-
-    // Insert features (batch)
-    final features = cars
-        .expand((c) =>
-            c.features.map((f) => {'car_id': c.id, 'feature': f}))
-        .toList();
-    await _db.from('car_features').insert(features);
+    return (rows as List).map((r) => _rowToCar(r as Map<String, dynamic>)).toList();
   }
 
-  // ── Read ──────────────────────────────────────────────────────────────────
+  // ── Grouping helpers (pure functions over a Car list) ───────────────────────
 
-  Future<List<Car>> getFiltered(CarFilter filter) async {
-    var query = _db.from('cars').select(
-      '*, car_colors(color), car_features(feature)',
-    );
-
-    if (filter.brand != null) {
-      query = query.eq('brand', filter.brand!);
+  static List<String> brandsOf(List<Car> cars) {
+    final set = <String>{};
+    for (final c in cars) {
+      set.add(c.brand);
     }
-    if (filter.bodyType != null) {
-      query = query.eq('body_type', filter.bodyType!);
-    }
-    if (filter.transmission != null) {
-      query = query.eq('transmission', filter.transmission!);
-    }
-    if (filter.driveSystem != null) {
-      query = query.eq('drive_system', filter.driveSystem!);
-    }
-    if (filter.maxPriceMillion != null) {
-      query = query.lte('price_min', filter.maxPriceMillion!);
-    }
-    if (filter.searchQuery.isNotEmpty) {
-      final q = filter.searchQuery;
-      query = query.or('brand.ilike.%$q%,type.ilike.%$q%,variant.ilike.%$q%');
-    }
-
-    final rows = await query.order('brand').order('type');
-    return rows.map(_rowToCar).toList();
+    final list = set.toList()..sort();
+    return list;
   }
 
-  Future<List<String>> getDistinctBrands() async {
-    final rows = await _db.from('cars').select('brand');
-    return rows
-        .map((r) => r['brand'] as String)
-        .toSet()
-        .toList()
-      ..sort();
+  static List<CarModel> modelsForBrand(List<Car> cars, String brand) {
+    final filtered = cars.where((c) => c.brand == brand).toList();
+    final byModel = <String, List<Car>>{};
+    for (final c in filtered) {
+      byModel.putIfAbsent(c.modelId, () => []).add(c);
+    }
+
+    final models = byModel.entries.map((e) {
+      final variants = e.value;
+      final any = variants.first;
+      return CarModel(
+        id: e.key,
+        brand: any.brand,
+        name: any.type,
+        bodyType: any.bodyType,
+        description: any.description,
+        heroImageUrl: variants.first.imageUrl,
+        variants: variants,
+      );
+    }).toList();
+
+    models.sort((a, b) => a.name.compareTo(b.name));
+    return models;
   }
 
-  Future<List<String>> getDistinctBodyTypes() async {
-    final rows = await _db.from('cars').select('body_type');
-    return rows
-        .map((r) => r['body_type'] as String)
-        .toSet()
-        .toList()
-      ..sort();
+  static List<CarGeneration> generationsForModel(
+      List<Car> cars, String modelId) {
+    final filtered = cars.where((c) => c.modelId == modelId).toList();
+    final byGen = <String, List<Car>>{};
+    for (final c in filtered) {
+      byGen.putIfAbsent(c.generationId, () => []).add(c);
+    }
+
+    final gens = byGen.entries.map((e) {
+      final variants = e.value;
+      final any = variants.first;
+      return CarGeneration(
+        id: e.key,
+        modelId: any.modelId,
+        name: any.generationName,
+        chassisCode: null, // not on Car; would need a separate fetch if needed
+        yearStart: any.generationYearStart ?? any.yearStart,
+        yearEnd: any.generationYearEnd,
+        description: '',
+        heroImageUrl: variants.first.imageUrl,
+        variants: variants,
+      );
+    }).toList();
+
+    // Newest generation first.
+    gens.sort((a, b) => b.yearStart.compareTo(a.yearStart));
+    return gens;
   }
 
-  Future<List<String>> getDistinctDriveSystems() async {
-    final rows = await _db.from('cars').select('drive_system');
-    return rows
-        .map((r) => r['drive_system'] as String)
-        .toSet()
-        .toList()
-      ..sort();
+  static List<Car> variantsForGeneration(List<Car> cars, String generationId) {
+    final filtered =
+        cars.where((c) => c.generationId == generationId).toList();
+    filtered.sort((a, b) => a.priceMinMillionIdr.compareTo(b.priceMinMillionIdr));
+    return filtered;
   }
 
-  // ── Mapping ───────────────────────────────────────────────────────────────
+  // ── Mapping ────────────────────────────────────────────────────────────────
 
   Car _rowToCar(Map<String, dynamic> row) {
-    final colorRows = (row['car_colors'] as List<dynamic>? ?? []);
-    final featureRows = (row['car_features'] as List<dynamic>? ?? []);
+    final gen = row['generations'] as Map<String, dynamic>;
+    final model = gen['models'] as Map<String, dynamic>;
+    final brand = model['brands'] as Map<String, dynamic>;
+
+    final colors = ((row['variant_colors'] as List?) ?? const [])
+        .map((e) => (e as Map)['color'] as String)
+        .toList();
+    final features = ((row['variant_features'] as List?) ?? const [])
+        .map((e) => (e as Map)['feature'] as String)
+        .toList();
 
     return Car(
       id: row['id'] as String,
-      brand: row['brand'] as String,
-      type: row['type'] as String,
-      variant: row['variant'] as String,
-      year: row['year'] as int,
-      bodyType: row['body_type'] as String,
-      engineType: row['engine_type'] as String,
-      engineDisplacementCc: row['engine_displacement_cc'] as int,
-      transmission: row['transmission'] as String,
-      driveSystem: row['drive_system'] as String,
-      colors: colorRows.map((r) => r['color'] as String).toList(),
-      fuelConsumptionKmPerL: (row['fuel_consumption'] as num).toDouble(),
-      seatingCapacity: row['seating_capacity'] as int,
-      priceMinMillionIdr: (row['price_min'] as num).toDouble(),
-      priceMaxMillionIdr: (row['price_max'] as num).toDouble(),
-      imageUrl: row['image_url'] as String,
-      description: row['description'] as String,
-      features: featureRows.map((r) => r['feature'] as String).toList(),
-      safetyRatingStars: row['safety_rating'] as int,
-      isElectric: row['is_electric'] as bool,
-      powerHp: row['power_hp'] as int,
-      torqueNm: row['torque_nm'] as int,
-      groundClearanceMm: row['ground_clearance_mm'] as int,
-      lengthWidthHeightMm: row['dimensions'] as String,
+      brand: brand['name'] as String,
+      modelId: model['id'] as String,
+      type: model['name'] as String,
+      generationId: gen['id'] as String,
+      generationName: gen['name'] as String,
+      generationYearStart: gen['year_start'] as int?,
+      generationYearEnd: gen['year_end'] as int?,
+      variant: row['trim_name'] as String,
+      yearStart: row['year_start'] as int,
+      yearEnd: row['year_end'] as int?,
+      bodyType: (model['body_type'] as String?) ?? '-',
+      engineType: (row['engine_type'] as String?) ?? '-',
+      engineDisplacementCc: (row['engine_displacement_cc'] as int?) ?? 0,
+      transmission: (row['transmission'] as String?) ?? '-',
+      driveSystem: (row['drive_system'] as String?) ?? '-',
+      colors: colors,
+      fuelConsumptionKmPerL:
+          ((row['fuel_consumption_km_per_l'] as num?) ?? 0).toDouble(),
+      seatingCapacity: (row['seating_capacity'] as int?) ?? 0,
+      priceMinMillionIdr:
+          ((row['price_min_million_idr'] as num?) ?? 0).toDouble(),
+      priceMaxMillionIdr:
+          ((row['price_max_million_idr'] as num?) ?? 0).toDouble(),
+      imageUrl: (row['image_url'] as String?) ?? '',
+      description: ((row['description'] as String?) ??
+          (gen['description'] as String?) ??
+          (model['description'] as String?) ??
+          ''),
+      features: features,
+      safetyRatingStars: (row['safety_rating'] as int?) ?? 0,
+      isElectric: (row['is_electric'] as bool?) ?? false,
+      powerHp: (row['power_hp'] as int?) ?? 0,
+      torqueNm: (row['torque_nm'] as int?) ?? 0,
+      groundClearanceMm: (row['ground_clearance_mm'] as int?) ?? 0,
+      lengthWidthHeightMm: (row['dimensions'] as String?) ?? '-',
     );
   }
-
-  Map<String, dynamic> _carToRow(Car car) => {
-        'id': car.id,
-        'brand': car.brand,
-        'type': car.type,
-        'variant': car.variant,
-        'year': car.year,
-        'body_type': car.bodyType,
-        'engine_type': car.engineType,
-        'engine_displacement_cc': car.engineDisplacementCc,
-        'transmission': car.transmission,
-        'drive_system': car.driveSystem,
-        'fuel_consumption': car.fuelConsumptionKmPerL,
-        'seating_capacity': car.seatingCapacity,
-        'price_min': car.priceMinMillionIdr,
-        'price_max': car.priceMaxMillionIdr,
-        'image_url': car.imageUrl,
-        'description': car.description,
-        'safety_rating': car.safetyRatingStars,
-        'is_electric': car.isElectric,
-        'power_hp': car.powerHp,
-        'torque_nm': car.torqueNm,
-        'ground_clearance_mm': car.groundClearanceMm,
-        'dimensions': car.lengthWidthHeightMm,
-      };
 }

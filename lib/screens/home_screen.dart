@@ -4,7 +4,7 @@ import '../providers/car_provider.dart';
 import '../data/brand_info.dart';
 import '../theme/app_theme.dart';
 import '../widgets/brand_logo.dart';
-import 'brand_cars_screen.dart';
+import 'brand_models_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -111,7 +111,7 @@ class _BrandCard extends StatelessWidget {
           context,
           PageRouteBuilder(
             transitionDuration: AppTheme.motionSlow,
-            pageBuilder: (_, anim, __) => BrandCarsScreen(brand: brand),
+            pageBuilder: (_, anim, __) => BrandModelsScreen(brand: brand),
             transitionsBuilder: (_, anim, __, child) {
               return FadeTransition(opacity: anim, child: child);
             },

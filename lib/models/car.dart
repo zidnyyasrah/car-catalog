@@ -1,9 +1,15 @@
 class Car {
   final String id;
   final String brand;
-  final String type;
-  final String variant;
-  final int year;
+  final String modelId;           // 'toyota-fortuner'
+  final String type;              // 'Fortuner'  (model name)
+  final String generationId;      // 'toyota-fortuner-gen2-fl'
+  final String generationName;    // 'Gen 2 Facelift'
+  final int? generationYearStart;
+  final int? generationYearEnd;
+  final String variant;           // '2.8 VRZ Diesel A/T'
+  final int yearStart;
+  final int? yearEnd;
   final String bodyType;
   final String engineType;
   final int engineDisplacementCc;
@@ -27,9 +33,15 @@ class Car {
   const Car({
     required this.id,
     required this.brand,
+    required this.modelId,
     required this.type,
+    required this.generationId,
+    required this.generationName,
+    required this.generationYearStart,
+    required this.generationYearEnd,
     required this.variant,
-    required this.year,
+    required this.yearStart,
+    required this.yearEnd,
     required this.bodyType,
     required this.engineType,
     required this.engineDisplacementCc,
@@ -53,8 +65,13 @@ class Car {
 
   String get fullName => '$brand $type $variant';
 
-  String get fuelConsumptionLabel =>
-      isElectric ? 'Electric' : '${fuelConsumptionKmPerL.toStringAsFixed(0)} km/L';
+  String get yearLabel => _yearRange(yearStart, yearEnd);
+  String get generationYearLabel =>
+      _yearRange(generationYearStart ?? yearStart, generationYearEnd);
+
+  String get fuelConsumptionLabel => isElectric
+      ? 'Electric'
+      : '${fuelConsumptionKmPerL.toStringAsFixed(0)} km/L';
 
   String get priceLabel {
     if (priceMinMillionIdr == priceMaxMillionIdr) {
@@ -62,4 +79,11 @@ class Car {
     }
     return 'Rp ${priceMinMillionIdr.toStringAsFixed(0)} - ${priceMaxMillionIdr.toStringAsFixed(0)} Jt';
   }
+}
+
+String _yearRange(int? start, int? end) {
+  if (start == null) return '';
+  if (end == null) return '$start - sekarang';
+  if (end == start) return '$start';
+  return '$start - $end';
 }

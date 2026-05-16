@@ -8,6 +8,7 @@ class BrandInfo {
   final Color secondary;
   final String tagline;
   final String? logoAsset;
+  final double logoScale;
 
   const BrandInfo({
     required this.name,
@@ -17,6 +18,7 @@ class BrandInfo {
     required this.secondary,
     required this.tagline,
     this.logoAsset,
+    this.logoScale = 1.0,
   });
 }
 
@@ -31,6 +33,7 @@ const Map<String, BrandInfo> brandInfo = {
     secondary: Color(0xFF8B0010),
     tagline: 'Let\'s Go Places',
     logoAsset: '$_basePath/toyota-svgrepo-com.svg',
+    logoScale: 1.45,
   ),
   'Honda': BrandInfo(
     name: 'Honda',
@@ -40,6 +43,7 @@ const Map<String, BrandInfo> brandInfo = {
     secondary: Color(0xFF8B0012),
     tagline: 'The Power of Dreams',
     logoAsset: '$_basePath/honda-svgrepo-com.svg',
+    logoScale: 1.3,
   ),
   'Daihatsu': BrandInfo(
     name: 'Daihatsu',
@@ -48,7 +52,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFF005EB8),
     secondary: Color(0xFF003B71),
     tagline: 'Sahabatku Daihatsu',
-    logoAsset: '$_basePath/daihatsu-1.svg',
+    logoAsset: '$_basePath/Daihatsu_Logo.svg',
   ),
   'Mitsubishi': BrandInfo(
     name: 'Mitsubishi',
@@ -75,7 +79,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFF002C5F),
     secondary: Color(0xFF00AAD2),
     tagline: 'New Thinking. New Possibilities.',
-    logoAsset: '$_basePath/hyundai.svg',
+    logoAsset: '$_basePath/hyundai-motor-company-logo.svg',
   ),
   'Kia': BrandInfo(
     name: 'Kia',
@@ -93,6 +97,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFC8102E),
     secondary: Color(0xFF5C0A1A),
     tagline: 'Drive for a Better Life',
+    logoAsset: '$_basePath/Wuling_logo_(dark_blue-gray).svg',
   ),
 };
 

@@ -5,24 +5,33 @@ import '../data/brand_info.dart';
 class BrandLogo extends StatelessWidget {
   final BrandInfo info;
   final double fallbackFontSize;
+  final Color? tint;
 
   const BrandLogo({
     super.key,
     required this.info,
     this.fallbackFontSize = 28,
+    this.tint,
   });
 
   @override
   Widget build(BuildContext context) {
     final asset = info.logoAsset;
-    if (asset != null) {
-      return SvgPicture.asset(
-        asset,
-        fit: BoxFit.contain,
-        placeholderBuilder: (_) => _fallback(),
-      );
-    }
-    return _fallback();
+    final Widget logo = asset != null
+        ? SvgPicture.asset(
+            asset,
+            fit: BoxFit.contain,
+            colorFilter: tint == null
+                ? null
+                : ColorFilter.mode(tint!, BlendMode.srcIn),
+            placeholderBuilder: (_) => _fallback(),
+          )
+        : _fallback();
+
+    if (info.logoScale == 1.0) return logo;
+    return ClipRect(
+      child: Transform.scale(scale: info.logoScale, child: logo),
+    );
   }
 
   Widget _fallback() {
@@ -32,7 +41,7 @@ class BrandLogo extends StatelessWidget {
         child: Text(
           info.name.toUpperCase(),
           style: TextStyle(
-            color: info.primary,
+            color: tint ?? info.primary,
             fontSize: fallbackFontSize,
             fontWeight: FontWeight.w900,
             letterSpacing: -1,

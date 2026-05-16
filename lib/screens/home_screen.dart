@@ -293,19 +293,19 @@ class _BrandCard extends StatelessWidget {
         child: Hero(
           tag: 'brand-$brand',
           child: Material(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            clipBehavior: Clip.antiAlias,
-            shadowColor: info.primary.withOpacity(0.25),
-            elevation: 4,
+            color: Colors.transparent,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 14),
+              padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
               child: Column(
                 children: [
                   Expanded(
-                    child: BrandLogo(info: info, fallbackFontSize: 32),
+                    child: BrandLogo(
+                      info: info,
+                      tint: AppTheme.textPrimary,
+                      fallbackFontSize: 32,
+                    ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Text(
                     '$carCount mobil',
                     style: const TextStyle(

@@ -5,7 +5,7 @@ import '../models/car_generation.dart';
 import '../models/car_model.dart';
 import '../providers/car_provider.dart';
 import '../theme/app_theme.dart';
-import 'generation_variants_screen.dart';
+import 'generation_detail_screen.dart';
 
 /// Step 3: tapped a model → vertical timeline of its generations
 /// (newest first), each tappable to view variants.
@@ -139,7 +139,7 @@ class _GenerationCard extends StatelessWidget {
           PageRouteBuilder(
             transitionDuration: AppTheme.motionSlow,
             pageBuilder: (_, anim, __) =>
-                GenerationVariantsScreen(generation: generation),
+                GenerationDetailScreen(generation: generation),
             transitionsBuilder: (_, anim, __, child) =>
                 FadeTransition(opacity: anim, child: child),
           ),

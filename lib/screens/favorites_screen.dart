@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/car_provider.dart';
 import '../widgets/car_card.dart';
 import '../theme/app_theme.dart';
-import 'car_detail_screen.dart';
+import 'generation_detail_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -66,12 +66,20 @@ class FavoritesScreen extends StatelessWidget {
                           final car = cars[index];
                           return CarCard(
                             car: car,
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CarDetailScreen(car: car),
-                              ),
-                            ),
+                            onTap: () {
+                              final gen =
+                                  provider.generationContaining(car.id);
+                              if (gen == null) return;
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => GenerationDetailScreen(
+                                    generation: gen,
+                                    initialVariantId: car.id,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                         childCount: cars.length,

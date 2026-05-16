@@ -42,6 +42,18 @@ class CarProvider extends ChangeNotifier {
     return null;
   }
 
+  /// Returns the CarGeneration object that contains the given variant.
+  /// Used to open the combined generation-detail page from favorites.
+  CarGeneration? generationContaining(String variantId) {
+    final variant = variantById(variantId);
+    if (variant == null) return null;
+    final gens = generationsForModel(variant.modelId);
+    for (final g in gens) {
+      if (g.id == variant.generationId) return g;
+    }
+    return null;
+  }
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   Future<void> init() async {

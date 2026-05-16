@@ -48,6 +48,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFF005EB8),
     secondary: Color(0xFF003B71),
     tagline: 'Sahabatku Daihatsu',
+    logoAsset: '$_basePath/daihatsu-1.svg',
   ),
   'Mitsubishi': BrandInfo(
     name: 'Mitsubishi',
@@ -56,6 +57,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFE60012),
     secondary: Color(0xFF8B000B),
     tagline: 'Drive Your Ambition',
+    logoAsset: '$_basePath/mitsubishi.svg',
   ),
   'Suzuki': BrandInfo(
     name: 'Suzuki',
@@ -64,6 +66,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFE60012),
     secondary: Color(0xFF003595),
     tagline: 'Way of Life!',
+    logoAsset: '$_basePath/suzuki-12.svg',
   ),
   'Hyundai': BrandInfo(
     name: 'Hyundai',
@@ -72,6 +75,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFF002C5F),
     secondary: Color(0xFF00AAD2),
     tagline: 'New Thinking. New Possibilities.',
+    logoAsset: '$_basePath/hyundai.svg',
   ),
   'Kia': BrandInfo(
     name: 'Kia',
@@ -80,6 +84,7 @@ const Map<String, BrandInfo> brandInfo = {
     primary: Color(0xFFBB162B),
     secondary: Color(0xFF05141F),
     tagline: 'Movement that inspires',
+    logoAsset: '$_basePath/kia-4.svg',
   ),
   'Wuling': BrandInfo(
     name: 'Wuling',

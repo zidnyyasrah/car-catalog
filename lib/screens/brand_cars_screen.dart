@@ -39,97 +39,97 @@ class _BrandCarsScreenState extends State<BrandCarsScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: CustomScrollView(
-        slivers: [
-          _BrandHeader(brand: widget.brand, info: info, count: brandCars.length),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: TextField(
-                onChanged: (v) => setState(() => _search = v),
-                style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: 'Cari di ${widget.brand}...',
-                  prefixIcon: const Icon(Icons.search,
-                      color: AppTheme.textMuted, size: 20),
-                ),
-              ),
-            ),
-          ),
-          if (bodyTypes.length > 1)
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 40,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: bodyTypes.length + 1,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (_, i) {
-                    if (i == 0) {
-                      return _BodyTypeChip(
-                        label: 'Semua',
-                        selected: _bodyTypeFilter == null,
-                        color: info.primary,
-                        onTap: () => setState(() => _bodyTypeFilter = null),
-                      );
-                    }
-                    final bt = bodyTypes[i - 1];
-                    return _BodyTypeChip(
-                      label: bt,
-                      selected: _bodyTypeFilter == bt,
-                      color: info.primary,
-                      onTap: () => setState(() => _bodyTypeFilter = bt),
-                    );
-                  },
-                ),
-              ),
-            ),
-          if (filtered.isEmpty)
-            const SliverFillRemaining(
-              hasScrollBody: false,
-              child: Padding(
-                padding: EdgeInsets.all(40),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off,
-                          size: 56, color: AppTheme.textMuted),
-                      SizedBox(height: 12),
-                      Text(
-                        'Tidak ada mobil cocok',
-                        style: TextStyle(
-                            color: AppTheme.textSecondary, fontSize: 15),
-                      ),
-                    ],
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            _TopBar(),
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: _BrandHeader(
+                      brand: widget.brand,
+                      info: info,
+                      count: brandCars.length,
+                    ),
                   ),
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.66,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final car = filtered[index];
-                    return CarCard(
-                      car: car,
-                      onTap: () => _openDetail(context, car),
-                    );
-                  },
-                  childCount: filtered.length,
-                ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                          AppTheme.xl, AppTheme.xl, AppTheme.xl, AppTheme.md),
+                      child: _SearchField(
+                        hint: 'Cari di ${widget.brand}...',
+                        onChanged: (v) => setState(() => _search = v),
+                      ),
+                    ),
+                  ),
+                  if (bodyTypes.length > 1)
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 36,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppTheme.xl),
+                          itemCount: bodyTypes.length + 1,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: AppTheme.sm),
+                          itemBuilder: (_, i) {
+                            if (i == 0) {
+                              return _FilterChip(
+                                label: 'Semua',
+                                selected: _bodyTypeFilter == null,
+                                onTap: () =>
+                                    setState(() => _bodyTypeFilter = null),
+                              );
+                            }
+                            final bt = bodyTypes[i - 1];
+                            return _FilterChip(
+                              label: bt,
+                              selected: _bodyTypeFilter == bt,
+                              onTap: () =>
+                                  setState(() => _bodyTypeFilter = bt),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  const SliverToBoxAdapter(child: SizedBox(height: AppTheme.lg)),
+                  if (filtered.isEmpty)
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _EmptyState(),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(
+                          AppTheme.lg, 0, AppTheme.lg, 120),
+                      sliver: SliverGrid(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.66,
+                          crossAxisSpacing: AppTheme.md,
+                          mainAxisSpacing: AppTheme.md,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final car = filtered[index];
+                            return CarCard(
+                              car: car,
+                              onTap: () => _openDetail(context, car),
+                            );
+                          },
+                          childCount: filtered.length,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -138,6 +138,49 @@ class _BrandCarsScreenState extends State<BrandCarsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => CarDetailScreen(car: car)),
+    );
+  }
+}
+
+class _TopBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppTheme.lg, AppTheme.md, AppTheme.lg, 0),
+      child: Row(
+        children: [
+          _IconBtn(
+            icon: Icons.arrow_back_rounded,
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IconBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _IconBtn({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppTheme.surface.withOpacity(0.6),
+      shape: const CircleBorder(
+        side: BorderSide(color: AppTheme.hairline),
+      ),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(icon, size: 18, color: AppTheme.textPrimary),
+        ),
+      ),
     );
   }
 }
@@ -155,160 +198,138 @@ class _BrandHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverAppBar(
-      expandedHeight: 200,
-      pinned: true,
-      backgroundColor: info.primary,
-      leading: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Material(
-          color: Colors.black.withOpacity(0.25),
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: () => Navigator.pop(context),
-            child: const Padding(
-              padding: EdgeInsets.all(8),
-              child: Icon(Icons.arrow_back_ios_new,
-                  size: 16, color: Colors.white),
-            ),
-          ),
-        ),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: Hero(
-          tag: 'brand-$brand',
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [info.primary, info.secondary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppTheme.xl, AppTheme.xl, AppTheme.xl, AppTheme.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Hero(
+            tag: 'brand-$brand',
+            child: Material(
+              color: Colors.transparent,
+              child: SizedBox(
+                height: 56,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: BrandLogo(
+                    info: info,
+                    tint: AppTheme.textPrimary,
+                    fallbackFontSize: 36,
+                  ),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-                child: Row(
+            ),
+          ),
+          const SizedBox(height: AppTheme.xl),
+          Text(
+            brand,
+            style: AppTheme.display(size: 44),
+          ),
+          const SizedBox(height: AppTheme.sm),
+          Text(
+            info.tagline,
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 13,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          const SizedBox(height: AppTheme.xl),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _MetaStat(value: '$count', label: 'MOBIL'),
+              const SizedBox(width: AppTheme.xl),
+              Container(width: 1, height: 40, color: AppTheme.hairline),
+              const SizedBox(width: AppTheme.xl),
+              _MetaStat(value: '${info.foundedYear}', label: 'SEJAK'),
+              const SizedBox(width: AppTheme.xl),
+              Container(width: 1, height: 40, color: AppTheme.hairline),
+              const SizedBox(width: AppTheme.xl),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.22),
-                            blurRadius: 18,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: SizedBox(
-                        width: 72,
-                        height: 72,
-                        child: BrandLogo(info: info, fallbackFontSize: 22),
+                    Text(
+                      info.country.toUpperCase(),
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              info.country,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            brand,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 26,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.5,
-                              height: 1,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            info.tagline,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.85),
-                              fontSize: 11,
-                              fontStyle: FontStyle.italic,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              _HeaderPill(
-                                icon: Icons.directions_car_rounded,
-                                label: '$count mobil',
-                              ),
-                              const SizedBox(width: 6),
-                              _HeaderPill(
-                                icon: Icons.history_rounded,
-                                label: 'Sejak ${info.foundedYear}',
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(height: 4),
+                    Text('ASAL', style: AppTheme.eyebrow()),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-class _HeaderPill extends StatelessWidget {
-  final IconData icon;
+class _MetaStat extends StatelessWidget {
+  final String value;
   final String label;
 
-  const _HeaderPill({required this.icon, required this.label});
+  const _MetaStat({required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(value, style: AppTheme.numeral(size: 28)),
+        const SizedBox(height: 4),
+        Text(label, style: AppTheme.eyebrow()),
+      ],
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  final String hint;
+  final ValueChanged<String> onChanged;
+
+  const _SearchField({required this.hint, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        color: AppTheme.surface.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.hairline),
       ),
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.lg),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: Colors.white),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
+          const Icon(Icons.search_rounded,
+              size: 18, color: AppTheme.textMuted),
+          const SizedBox(width: AppTheme.md),
+          Expanded(
+            child: TextField(
+              onChanged: onChanged,
+              style: const TextStyle(
+                  color: AppTheme.textPrimary, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: const TextStyle(
+                    color: AppTheme.textMuted, fontSize: 14),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                isCollapsed: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: AppTheme.lg),
+              ),
             ),
           ),
         ],
@@ -317,16 +338,14 @@ class _HeaderPill extends StatelessWidget {
   }
 }
 
-class _BodyTypeChip extends StatelessWidget {
+class _FilterChip extends StatelessWidget {
   final String label;
   final bool selected;
-  final Color color;
   final VoidCallback onTap;
 
-  const _BodyTypeChip({
+  const _FilterChip({
     required this.label,
     required this.selected,
-    required this.color,
     required this.onTap,
   });
 
@@ -335,26 +354,58 @@ class _BodyTypeChip extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(999),
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          duration: AppTheme.motionFast,
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.lg, vertical: AppTheme.sm),
           decoration: BoxDecoration(
-            color: selected ? color : AppTheme.surface,
-            borderRadius: BorderRadius.circular(20),
+            color: selected ? AppTheme.textPrimary : Colors.transparent,
+            borderRadius: BorderRadius.circular(999),
             border: Border.all(
-              color: selected ? color : AppTheme.border,
+              color: selected ? AppTheme.textPrimary : AppTheme.hairline,
             ),
           ),
           child: Text(
-            label,
+            label.toUpperCase(),
             style: TextStyle(
-              color: selected ? Colors.white : AppTheme.textSecondary,
-              fontSize: 12,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? AppTheme.background : AppTheme.textSecondary,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.xxl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('TIDAK ADA HASIL',
+                style: AppTheme.eyebrow(color: AppTheme.textPrimary)),
+            const SizedBox(height: AppTheme.md),
+            Text(
+              'Tidak ada mobil yang cocok\ndengan pencarianmu.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppTheme.textMuted,
+                fontSize: 13,
+                height: 1.6,
+              ),
+            ),
+          ],
         ),
       ),
     );

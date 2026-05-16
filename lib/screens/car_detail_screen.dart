@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../models/car.dart';
 import '../providers/car_provider.dart';
-import '../data/brand_info.dart';
 import '../theme/app_theme.dart';
 
 class CarDetailScreen extends StatelessWidget {
@@ -13,51 +12,55 @@ class CarDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brand = brandInfoFor(car.brand);
-
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: CustomScrollView(
         slivers: [
-          _HeroAppBar(car: car, brandColor: brand.primary),
+          _HeroAppBar(car: car),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(
+                  AppTheme.xl, AppTheme.xl, AppTheme.xl, 120),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _TitleSection(car: car, brandColor: brand.primary),
-                  const SizedBox(height: 20),
-                  _PriceAndStats(car: car, brandColor: brand.primary),
-                  const SizedBox(height: 28),
-                  const _SectionTitle('Tentang Mobil Ini'),
-                  const SizedBox(height: 10),
-                  Text(
-                    car.description,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 14,
-                      height: 1.65,
+                  _TitleBlock(car: car),
+                  const SizedBox(height: AppTheme.xxl),
+                  _PriceRow(car: car),
+                  const SizedBox(height: AppTheme.xxl),
+                  _QuickStatsGrid(car: car),
+                  const SizedBox(height: AppTheme.xxl),
+                  _Section(
+                    label: 'DESKRIPSI',
+                    child: Text(
+                      car.description,
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 14,
+                        height: 1.7,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 28),
-                  const _SectionTitle('Spesifikasi Mesin'),
-                  const SizedBox(height: 12),
-                  _SpecsCard(specs: _engineSpecs(car)),
-                  const SizedBox(height: 24),
-                  const _SectionTitle('Spesifikasi Umum'),
-                  const SizedBox(height: 12),
-                  _SpecsCard(specs: _generalSpecs(car)),
-                  const SizedBox(height: 28),
-                  const _SectionTitle('Warna Tersedia'),
-                  const SizedBox(height: 14),
-                  _ColorsSection(colors: car.colors),
-                  const SizedBox(height: 28),
-                  const _SectionTitle('Fitur Unggulan'),
-                  const SizedBox(height: 12),
-                  _FeaturesSection(
-                      features: car.features, accent: brand.primary),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppTheme.xxl),
+                  _Section(
+                    label: 'MESIN',
+                    child: _SpecList(specs: _engineSpecs(car)),
+                  ),
+                  const SizedBox(height: AppTheme.xxl),
+                  _Section(
+                    label: 'UMUM',
+                    child: _SpecList(specs: _generalSpecs(car)),
+                  ),
+                  const SizedBox(height: AppTheme.xxl),
+                  _Section(
+                    label: 'WARNA',
+                    child: _ColorPalette(colors: car.colors),
+                  ),
+                  const SizedBox(height: AppTheme.xxl),
+                  _Section(
+                    label: 'FITUR',
+                    child: _FeatureList(features: car.features),
+                  ),
                 ],
               ),
             ),
@@ -89,52 +92,33 @@ class CarDetailScreen extends StatelessWidget {
 
 class _HeroAppBar extends StatelessWidget {
   final Car car;
-  final Color brandColor;
-  const _HeroAppBar({required this.car, required this.brandColor});
+  const _HeroAppBar({required this.car});
 
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 280,
+      expandedHeight: 320,
       pinned: true,
       backgroundColor: AppTheme.background,
       leading: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Material(
-          color: Colors.black.withOpacity(0.45),
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: () => Navigator.pop(context),
-            child: const Padding(
-              padding: EdgeInsets.all(8),
-              child: Icon(Icons.arrow_back_ios_new,
-                  size: 16, color: Colors.white),
-            ),
-          ),
+        padding: const EdgeInsets.all(AppTheme.sm),
+        child: _CircleBtn(
+          icon: Icons.arrow_back_rounded,
+          onTap: () => Navigator.pop(context),
         ),
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(AppTheme.sm),
           child: Consumer<CarProvider>(
             builder: (_, provider, __) {
               final isFav = provider.isFavorite(car.id);
-              return Material(
-                color: Colors.black.withOpacity(0.45),
-                shape: const CircleBorder(),
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => provider.toggleFavorite(car.id),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      isFav ? Icons.favorite : Icons.favorite_border,
-                      size: 18,
-                      color: isFav ? AppTheme.accent : Colors.white,
-                    ),
-                  ),
-                ),
+              return _CircleBtn(
+                icon: isFav
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                iconColor: isFav ? AppTheme.accent : Colors.white,
+                onTap: () => provider.toggleFavorite(car.id),
               );
             },
           ),
@@ -149,15 +133,8 @@ class _HeroAppBar extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: car.imageUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Container(
-                  color: AppTheme.surfaceElevated,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: brandColor,
-                    ),
-                  ),
-                ),
+                placeholder: (_, __) =>
+                    Container(color: AppTheme.surfaceElevated),
                 errorWidget: (_, __, ___) => Container(
                   color: AppTheme.surfaceElevated,
                   child: const Icon(Icons.directions_car,
@@ -172,10 +149,10 @@ class _HeroAppBar extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    AppTheme.background.withOpacity(0.4),
+                    AppTheme.background.withOpacity(0.5),
                     AppTheme.background,
                   ],
-                  stops: const [0.4, 0.8, 1.0],
+                  stops: const [0.35, 0.8, 1.0],
                 ),
               ),
             ),
@@ -186,10 +163,39 @@ class _HeroAppBar extends StatelessWidget {
   }
 }
 
-class _TitleSection extends StatelessWidget {
+class _CircleBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color? iconColor;
+
+  const _CircleBtn({
+    required this.icon,
+    required this.onTap,
+    this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withOpacity(0.45),
+      shape: const CircleBorder(
+        side: BorderSide(color: Color(0x33FFFFFF), width: 0.5),
+      ),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.sm),
+          child: Icon(icon, size: 16, color: iconColor ?? Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+class _TitleBlock extends StatelessWidget {
   final Car car;
-  final Color brandColor;
-  const _TitleSection({required this.car, required this.brandColor});
+  const _TitleBlock({required this.car});
 
   @override
   Widget build(BuildContext context) {
@@ -198,59 +204,54 @@ class _TitleSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            _Badge(label: car.bodyType, color: brandColor),
+            Text(car.brand.toUpperCase(),
+                style: AppTheme.eyebrow(color: AppTheme.textPrimary)),
+            const SizedBox(width: AppTheme.md),
+            Container(width: 1, height: 10, color: AppTheme.hairline),
+            const SizedBox(width: AppTheme.md),
+            Text('${car.year}', style: AppTheme.eyebrow()),
+            const SizedBox(width: AppTheme.md),
+            Container(width: 1, height: 10, color: AppTheme.hairline),
+            const SizedBox(width: AppTheme.md),
+            Text(car.bodyType.toUpperCase(), style: AppTheme.eyebrow()),
             if (car.isElectric) ...[
-              const SizedBox(width: 8),
-              const _Badge(label: 'Electric', color: AppTheme.electric),
+              const SizedBox(width: AppTheme.md),
+              Container(width: 1, height: 10, color: AppTheme.hairline),
+              const SizedBox(width: AppTheme.md),
+              Text('ELECTRIC',
+                  style: AppTheme.eyebrow(color: AppTheme.electric)),
             ],
-            const SizedBox(width: 8),
-            _Badge(label: '${car.year}', color: AppTheme.textSecondary),
           ],
         ),
-        const SizedBox(height: 10),
-        Text(
-          car.brand,
-          style: TextStyle(
-            color: brandColor,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          car.type,
-          style: const TextStyle(
-            color: AppTheme.textPrimary,
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
-            height: 1.1,
-            letterSpacing: -0.5,
-          ),
-        ),
+        const SizedBox(height: AppTheme.lg),
+        Text(car.type, style: AppTheme.display(size: 40)),
+        const SizedBox(height: AppTheme.sx),
         Text(
           car.variant,
           style: const TextStyle(
             color: AppTheme.textSecondary,
             fontSize: 15,
+            height: 1.3,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppTheme.lg),
         Row(
           children: [
             ...List.generate(
               5,
-              (i) => Icon(
-                i < car.safetyRatingStars ? Icons.star : Icons.star_border,
-                size: 16,
-                color: AppTheme.gold,
+              (i) => Padding(
+                padding: const EdgeInsets.only(right: 2),
+                child: Icon(
+                  i < car.safetyRatingStars
+                      ? Icons.star_rounded
+                      : Icons.star_outline_rounded,
+                  size: 16,
+                  color: AppTheme.gold,
+                ),
               ),
             ),
-            const SizedBox(width: 6),
-            const Text(
-              'ASEAN NCAP',
-              style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
-            ),
+            const SizedBox(width: AppTheme.sm),
+            Text('ASEAN NCAP', style: AppTheme.eyebrow()),
           ],
         ),
       ],
@@ -258,90 +259,95 @@ class _TitleSection extends StatelessWidget {
   }
 }
 
-class _PriceAndStats extends StatelessWidget {
+class _PriceRow extends StatelessWidget {
   final Car car;
-  final Color brandColor;
-  const _PriceAndStats({required this.car, required this.brandColor});
+  const _PriceRow({required this.car});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Harga OTR',
-                style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(height: 1, color: AppTheme.hairline),
+        const SizedBox(height: AppTheme.lg),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('HARGA OTR', style: AppTheme.eyebrow()),
+                  const SizedBox(height: AppTheme.sm),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      car.priceLabel,
+                      style: AppTheme.display(
+                          color: AppTheme.accent, size: 28),
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                car.priceLabel,
-                style: TextStyle(
-                  color: brandColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppTheme.lg),
+        Container(height: 1, color: AppTheme.hairline),
+      ],
+    );
+  }
+}
+
+class _QuickStatsGrid extends StatelessWidget {
+  final Car car;
+  const _QuickStatsGrid({required this.car});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _QuickStat(value: '${car.powerHp}', unit: 'HP', label: 'TENAGA'),
+        ),
+        Container(width: 1, height: 56, color: AppTheme.hairline),
+        Expanded(
+          child: _QuickStat(value: '${car.torqueNm}', unit: 'Nm', label: 'TORSI'),
+        ),
+        Container(width: 1, height: 56, color: AppTheme.hairline),
+        Expanded(
+          child: car.isElectric
+              ? _QuickStat(
+                  value: 'EV',
+                  unit: '',
+                  label: 'TENAGA',
+                  valueColor: AppTheme.electric,
+                )
+              : _QuickStat(
+                  value: car.fuelConsumptionKmPerL.toStringAsFixed(0),
+                  unit: 'km/L',
+                  label: 'BBM',
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Divider(color: AppTheme.border, height: 1),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _QuickStat(
-                icon: Icons.speed_rounded,
-                value: '${car.powerHp}',
-                unit: 'HP',
-                label: 'Tenaga',
-              ),
-              _QuickStat(
-                icon: Icons.rotate_right_rounded,
-                value: '${car.torqueNm}',
-                unit: 'Nm',
-                label: 'Torsi',
-              ),
-              _QuickStat(
-                icon: car.isElectric
-                    ? Icons.bolt_rounded
-                    : Icons.local_gas_station_rounded,
-                value: car.isElectric
-                    ? 'EV'
-                    : car.fuelConsumptionKmPerL.toStringAsFixed(0),
-                unit: car.isElectric ? '' : 'km/L',
-                label: 'Konsumsi',
-                valueColor: car.isElectric ? AppTheme.electric : null,
-              ),
-              _QuickStat(
-                icon: Icons.people_rounded,
-                value: '${car.seatingCapacity}',
-                unit: '',
-                label: 'Kursi',
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+        Container(width: 1, height: 56, color: AppTheme.hairline),
+        Expanded(
+          child:
+              _QuickStat(value: '${car.seatingCapacity}', unit: '', label: 'KURSI'),
+        ),
+      ],
     );
   }
 }
 
 class _QuickStat extends StatelessWidget {
-  final IconData icon;
   final String value;
   final String unit;
   final String label;
   final Color? valueColor;
 
   const _QuickStat({
-    required this.icon,
     required this.value,
     required this.unit,
     required this.label,
@@ -350,21 +356,21 @@ class _QuickStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.sm),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 22, color: valueColor ?? AppTheme.textSecondary),
-          const SizedBox(height: 6),
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
               children: [
                 TextSpan(
                   text: value,
-                  style: TextStyle(
+                  style: AppTheme.numeral(
                     color: valueColor ?? AppTheme.textPrimary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    size: 22,
                   ),
                 ),
                 if (unit.isNotEmpty)
@@ -372,20 +378,44 @@ class _QuickStat extends StatelessWidget {
                     text: ' $unit',
                     style: const TextStyle(
                       color: AppTheme.textMuted,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
               ],
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(color: AppTheme.textMuted, fontSize: 10),
-          ),
+          const SizedBox(height: AppTheme.sm),
+          Text(label, style: AppTheme.eyebrow()),
         ],
       ),
+    );
+  }
+}
+
+class _Section extends StatelessWidget {
+  final String label;
+  final Widget child;
+
+  const _Section({required this.label, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(label,
+                style: AppTheme.eyebrow(color: AppTheme.textPrimary)),
+            const SizedBox(width: AppTheme.md),
+            Expanded(
+                child: Container(height: 1, color: AppTheme.hairline)),
+          ],
+        ),
+        const SizedBox(height: AppTheme.lg),
+        child,
+      ],
     );
   }
 }
@@ -396,65 +426,53 @@ class _SpecItem {
   const _SpecItem(this.label, this.value);
 }
 
-class _SpecsCard extends StatelessWidget {
+class _SpecList extends StatelessWidget {
   final List<_SpecItem> specs;
-  const _SpecsCard({required this.specs});
+  const _SpecList({required this.specs});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.border),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Column(
-        children: List.generate(specs.length, (i) {
-          final spec = specs[i];
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              border: i < specs.length - 1
-                  ? const Border(
-                      bottom: BorderSide(color: AppTheme.border, width: 0.5),
-                    )
-                  : null,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  spec.label,
+    return Column(
+      children: [
+        for (int i = 0; i < specs.length; i++) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                specs[i].label,
+                style: const TextStyle(
+                  color: AppTheme.textMuted,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(width: AppTheme.lg),
+              Flexible(
+                child: Text(
+                  specs[i].value,
                   style: const TextStyle(
-                    color: AppTheme.textMuted,
+                    color: AppTheme.textPrimary,
                     fontSize: 13,
+                    fontWeight: FontWeight.w700,
                   ),
+                  textAlign: TextAlign.end,
                 ),
-                const SizedBox(width: 16),
-                Flexible(
-                  child: Text(
-                    spec.value,
-                    style: const TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.end,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ),
+              ),
+            ],
+          ),
+          if (i < specs.length - 1) ...[
+            const SizedBox(height: AppTheme.md),
+            Container(height: 1, color: AppTheme.hairline),
+            const SizedBox(height: AppTheme.md),
+          ],
+        ],
+      ],
     );
   }
 }
 
-class _ColorsSection extends StatelessWidget {
+class _ColorPalette extends StatelessWidget {
   final List<String> colors;
-  const _ColorsSection({required this.colors});
+  const _ColorPalette({required this.colors});
 
   static const _colorMap = <String, Color>{
     'Putih': Color(0xFFF5F5F5),
@@ -478,8 +496,8 @@ class _ColorsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 16,
-      runSpacing: 14,
+      spacing: AppTheme.lg,
+      runSpacing: AppTheme.lg,
       children: colors.map((color) {
         final c = _colorMap[color] ?? Colors.grey;
         return SizedBox(
@@ -487,27 +505,21 @@ class _ColorsSection extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: c,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.border, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: c.withOpacity(0.35),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+                  border: Border.all(color: AppTheme.hairline, width: 1.5),
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: AppTheme.sm),
               Text(
                 color,
                 style: const TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 10,
+                  height: 1.2,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -519,101 +531,45 @@ class _ColorsSection extends StatelessWidget {
   }
 }
 
-class _FeaturesSection extends StatelessWidget {
+class _FeatureList extends StatelessWidget {
   final List<String> features;
-  final Color accent;
-
-  const _FeaturesSection({required this.features, required this.accent});
+  const _FeatureList({required this.features});
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: features.map((feature) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.surface,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppTheme.border),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.check_circle_rounded, size: 14, color: accent),
-              const SizedBox(width: 6),
-              Text(
-                feature,
-                style: const TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  const _SectionTitle(this.title);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 4,
-          height: 18,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppTheme.accent, AppTheme.accentSoft],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+        for (final f in features)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppTheme.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 7),
+                  width: 4,
+                  height: 4,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.accent,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: AppTheme.md),
+                Expanded(
+                  child: Text(
+                    f,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 13.5,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            borderRadius: BorderRadius.circular(2),
           ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          title,
-          style: const TextStyle(
-            color: AppTheme.textPrimary,
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ],
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  final String label;
-  final Color color;
-  const _Badge({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.4)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
     );
   }
 }

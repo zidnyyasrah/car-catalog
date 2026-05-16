@@ -13,126 +13,103 @@ class FavoritesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppTheme.accent.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.favorite_rounded,
-                      color: AppTheme.accent,
-                      size: 20,
+        bottom: false,
+        child: Consumer<CarProvider>(
+          builder: (_, provider, __) {
+            final cars = provider.favoriteCars;
+
+            return CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                        AppTheme.xl, AppTheme.xxl, AppTheme.xl, AppTheme.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Mobil', style: AppTheme.display(size: 44)),
+                        Text(
+                          'favorit.',
+                          style: AppTheme.display(
+                              color: AppTheme.accent, size: 44),
+                        ),
+                        const SizedBox(height: AppTheme.lg),
+                        Text(
+                          cars.length.toString().padLeft(2, '0'),
+                          style: AppTheme.numeral(size: 28),
+                        ),
+                        const SizedBox(height: AppTheme.sx),
+                        Text('DISIMPAN', style: AppTheme.eyebrow()),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Favorit',
-                    style: TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const Spacer(),
-                  Consumer<CarProvider>(
-                    builder: (_, provider, __) => Text(
-                      '${provider.favoriteCars.length}',
-                      style: const TextStyle(
-                        color: AppTheme.textMuted,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                ),
+                if (cars.isEmpty)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: _EmptyState(),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                        AppTheme.lg, AppTheme.lg, AppTheme.lg, 120),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.66,
+                        crossAxisSpacing: AppTheme.md,
+                        mainAxisSpacing: AppTheme.md,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final car = cars[index];
+                          return CarCard(
+                            car: car,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CarDetailScreen(car: car),
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: cars.length,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: Consumer<CarProvider>(
-                builder: (_, provider, __) {
-                  final cars = provider.favoriteCars;
-                  if (cars.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(40),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: AppTheme.surface,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: AppTheme.border),
-                              ),
-                              child: const Icon(
-                                Icons.favorite_border,
-                                size: 36,
-                                color: AppTheme.textMuted,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Belum ada favorit',
-                              style: TextStyle(
-                                color: AppTheme.textPrimary,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Tap ikon hati pada mobil untuk\nmenyimpan ke favorit',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: AppTheme.textMuted,
-                                fontSize: 13,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.66,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
-                    itemCount: cars.length,
-                    itemBuilder: (context, index) {
-                      final car = cars[index];
-                      return CarCard(
-                        car: car,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => CarDetailScreen(car: car)),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppTheme.xxl),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('BELUM ADA',
+              style: AppTheme.eyebrow(color: AppTheme.textPrimary)),
+          const SizedBox(height: AppTheme.md),
+          const Text(
+            'Tap ikon hati pada mobil\nuntuk menyimpan ke favorit.',
+            style: TextStyle(
+              color: AppTheme.textMuted,
+              fontSize: 14,
+              height: 1.6,
+            ),
+          ),
+        ],
       ),
     );
   }

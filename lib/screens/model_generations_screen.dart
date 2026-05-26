@@ -200,7 +200,7 @@ class _GenerationCard extends StatelessWidget {
                           ),
                           child: Text(
                             'AKTIF',
-                            style: AppTheme.eyebrow(color: Colors.white),
+                            style: AppTheme.eyebrow(color: AppTheme.onAccent),
                           ),
                         ),
                       ),

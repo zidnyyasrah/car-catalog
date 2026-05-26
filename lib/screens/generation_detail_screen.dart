@@ -772,7 +772,7 @@ class _Breadcrumb extends StatelessWidget {
                 borderRadius: BorderRadius.circular(5),
               ),
               child: Text('AKTIF',
-                  style: AppTheme.eyebrow(color: Colors.white)),
+                  style: AppTheme.eyebrow(color: AppTheme.onAccent)),
             ),
           ],
         ],

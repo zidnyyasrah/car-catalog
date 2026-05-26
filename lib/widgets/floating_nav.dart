@@ -97,7 +97,7 @@ class _NavSlot extends StatelessWidget {
               Icon(
                 active ? item.activeIcon : item.icon,
                 size: 18,
-                color: active ? Colors.white : AppTheme.textMuted,
+                color: active ? AppTheme.onAccent : AppTheme.textMuted,
               ),
               AnimatedSize(
                 duration: AppTheme.motion,
@@ -108,7 +108,7 @@ class _NavSlot extends StatelessWidget {
                         child: Text(
                           item.label.toUpperCase(),
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.onAccent,
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 1.4,

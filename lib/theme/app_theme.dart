@@ -2,18 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color background = Color(0xFF0A0A0F);
-  static const Color surface = Color(0xFF14141F);
-  static const Color surfaceElevated = Color(0xFF1C1C2A);
-  static const Color border = Color(0xFF24243A);
-  static const Color hairline = Color(0xFF1F1F2C);
-  static const Color accent = Color(0xFFFF3D5A);
-  static const Color accentSoft = Color(0xFFFF7A8C);
-  static const Color textPrimary = Color(0xFFF5F5F7);
-  static const Color textSecondary = Color(0xFF9090A8);
-  static const Color textMuted = Color(0xFF5E5E78);
-  static const Color electric = Color(0xFF00E5B0);
-  static const Color gold = Color(0xFFFFC857);
+  // Deep teal foundation — the dark surfaces in the reference design.
+  static const Color background = Color(0xFF1E3A3F);
+  static const Color surface = Color(0xFF26464B);
+  static const Color surfaceElevated = Color(0xFF2F5258);
+  static const Color border = Color(0xFF3A6066);
+  static const Color hairline = Color(0xFF2B4C51);
+
+  // Bright lime accent — primary action / highlight.
+  static const Color accent = Color(0xFFCBE547);
+  static const Color accentSoft = Color(0xFFDDEE82);
+  // Text/icon color to sit on top of the lime accent.
+  static const Color onAccent = Color(0xFF1E3A3F);
+
+  // Warm off-white & muted teal-greys for editorial typography.
+  static const Color textPrimary = Color(0xFFF3EFE7);
+  static const Color textSecondary = Color(0xFFA8BCB9);
+  static const Color textMuted = Color(0xFF6E8589);
+
+  // Soft lavender + champagne as secondary accents (electric kept as the
+  // existing constant name so the EV chip etc. keep compiling).
+  static const Color electric = Color(0xFFC8B8E0);
+  static const Color gold = Color(0xFFE6D2A7);
 
   static const double sx = 4;
   static const double sm = 8;
@@ -61,7 +71,7 @@ class AppTheme {
         primary: accent,
         secondary: electric,
         surface: surface,
-        onPrimary: Colors.white,
+        onPrimary: onAccent,
         onSurface: textPrimary,
       ),
       scaffoldBackgroundColor: background,

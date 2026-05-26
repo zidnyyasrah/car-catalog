@@ -5,7 +5,9 @@ import '../models/car_model.dart';
 import '../providers/car_provider.dart';
 import '../data/brand_info.dart';
 import '../widgets/brand_logo.dart';
+import '../widgets/admin_actions.dart';
 import '../theme/app_theme.dart';
+import 'forms/model_form_screen.dart';
 import 'model_generations_screen.dart';
 
 /// Step 2 of the user journey: tapped a brand → list of models for it.
@@ -21,6 +23,24 @@ class BrandModelsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: FloatingActionButton.extended(
+          backgroundColor: AppTheme.accent,
+          foregroundColor: AppTheme.onAccent,
+          elevation: 0,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ModelFormScreen(brand: brand),
+            ),
+          ),
+          icon: const Icon(Icons.add_rounded),
+          label: Text('MODEL',
+              style: AppTheme.eyebrow(color: AppTheme.onAccent)
+                  .copyWith(fontSize: 12)),
+        ),
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -82,6 +102,31 @@ class _ModelCard extends StatelessWidget {
             transitionsBuilder: (_, anim, __, child) =>
                 FadeTransition(opacity: anim, child: child),
           ),
+        ),
+        onLongPress: () => AdminActionSheet.show(
+          context,
+          title: model.name,
+          subtitle: '${model.brand}  ·  ${model.bodyType}',
+          onEdit: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ModelFormScreen(
+                brand: model.brand,
+                existing: model,
+              ),
+            ),
+          ),
+          onDelete: () async {
+            final provider = context.read<CarProvider>();
+            final ok = await confirmDelete(
+              context,
+              title: 'Hapus ${model.name}?',
+              message:
+                  'Semua generasi dan varian model ini akan ikut terhapus.',
+            );
+            if (!ok) return;
+            await provider.removeModel(model.id);
+          },
         ),
         child: Container(
           decoration: BoxDecoration(

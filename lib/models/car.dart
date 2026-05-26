@@ -5,6 +5,7 @@ class Car {
   final String type;              // 'Fortuner'  (model name)
   final String generationId;      // 'toyota-fortuner-gen2-fl'
   final String generationName;    // 'Gen 2 Facelift'
+  final String? generationChassisCode;
   final int? generationYearStart;
   final int? generationYearEnd;
   final String variant;           // '2.8 VRZ Diesel A/T'
@@ -37,6 +38,7 @@ class Car {
     required this.type,
     required this.generationId,
     required this.generationName,
+    this.generationChassisCode,
     required this.generationYearStart,
     required this.generationYearEnd,
     required this.variant,

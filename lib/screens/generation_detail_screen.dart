@@ -5,6 +5,8 @@ import '../models/car.dart';
 import '../models/car_generation.dart';
 import '../providers/car_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/admin_actions.dart';
+import 'forms/variant_form_screen.dart';
 
 /// Single-page variant browser within a generation.
 ///
@@ -53,13 +55,17 @@ class _GenerationDetailScreenState extends State<GenerationDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_variants.isEmpty) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: AppTheme.background,
         body: SafeArea(
           child: Column(
             children: [
-              _TopBar(carId: null),
-              Expanded(child: _EmptyState()),
+              _TopBar(
+                carId: null,
+                generation: widget.generation,
+                current: null,
+              ),
+              const Expanded(child: _EmptyState()),
             ],
           ),
         ),
@@ -74,7 +80,11 @@ class _GenerationDetailScreenState extends State<GenerationDetailScreen> {
         bottom: false,
         child: Column(
           children: [
-            _TopBar(carId: current.id),
+            _TopBar(
+              carId: current.id,
+              generation: widget.generation,
+              current: current,
+            ),
             _Breadcrumb(generation: widget.generation, brand: current.brand),
             _HeroPager(
               variants: _variants,
@@ -696,7 +706,14 @@ class _FeatureList extends StatelessWidget {
 class _TopBar extends StatelessWidget {
   /// Null while the variant list is empty.
   final String? carId;
-  const _TopBar({required this.carId});
+  final CarGeneration generation;
+  final Car? current;
+
+  const _TopBar({
+    required this.carId,
+    required this.generation,
+    required this.current,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -723,8 +740,110 @@ class _TopBar extends StatelessWidget {
                 );
               },
             ),
+          const SizedBox(width: AppTheme.sm),
+          _AdminMenu(generation: generation, current: current),
         ],
       ),
+    );
+  }
+}
+
+class _AdminMenu extends StatelessWidget {
+  final CarGeneration generation;
+  final Car? current;
+  const _AdminMenu({required this.generation, required this.current});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppTheme.surface,
+      shape: const CircleBorder(
+        side: BorderSide(color: AppTheme.hairline),
+      ),
+      child: PopupMenuButton<String>(
+        icon: const Icon(Icons.more_horiz_rounded,
+            size: 18, color: AppTheme.textPrimary),
+        color: AppTheme.surfaceElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        ),
+        onSelected: (key) async {
+          final provider = context.read<CarProvider>();
+          switch (key) {
+            case 'add':
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      VariantFormScreen(generation: generation),
+                ),
+              );
+              break;
+            case 'edit':
+              if (current == null) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => VariantFormScreen(
+                    generation: generation,
+                    existing: current,
+                  ),
+                ),
+              );
+              break;
+            case 'delete':
+              if (current == null) return;
+              final ok = await confirmDelete(
+                context,
+                title: 'Hapus varian?',
+                message:
+                    '${current!.variant} akan terhapus dari katalog ini.',
+              );
+              if (!ok) return;
+              await provider.removeVariant(current!.id);
+              if (context.mounted) Navigator.pop(context);
+              break;
+          }
+        },
+        itemBuilder: (_) => [
+          PopupMenuItem(
+            value: 'add',
+            child: _menuRow(Icons.add_rounded, 'TAMBAH VARIAN'),
+          ),
+          if (current != null)
+            PopupMenuItem(
+              value: 'edit',
+              child: _menuRow(Icons.edit_outlined, 'EDIT VARIAN'),
+            ),
+          if (current != null)
+            PopupMenuItem(
+              value: 'delete',
+              child: _menuRow(
+                Icons.delete_outline_rounded,
+                'HAPUS VARIAN',
+                destructive: true,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _menuRow(IconData icon, String label, {bool destructive = false}) {
+    final fg =
+        destructive ? const Color(0xFFFF8585) : AppTheme.textPrimary;
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: fg),
+        const SizedBox(width: AppTheme.md),
+        Text(label,
+            style: TextStyle(
+              color: fg,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.4,
+            )),
+      ],
     );
   }
 }

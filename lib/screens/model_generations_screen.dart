@@ -5,6 +5,8 @@ import '../models/car_generation.dart';
 import '../models/car_model.dart';
 import '../providers/car_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/admin_actions.dart';
+import 'forms/generation_form_screen.dart';
 import 'generation_detail_screen.dart';
 
 /// Step 3: tapped a model → vertical timeline of its generations
@@ -20,6 +22,24 @@ class ModelGenerationsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: FloatingActionButton.extended(
+          backgroundColor: AppTheme.accent,
+          foregroundColor: AppTheme.onAccent,
+          elevation: 0,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => GenerationFormScreen(model: model),
+            ),
+          ),
+          icon: const Icon(Icons.add_rounded),
+          label: Text('GENERASI',
+              style: AppTheme.eyebrow(color: AppTheme.onAccent)
+                  .copyWith(fontSize: 12)),
+        ),
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -48,6 +68,7 @@ class ModelGenerationsScreen extends StatelessWidget {
                         itemCount: generations.length,
                         itemBuilder: (_, i) => _TimelineRow(
                           generation: generations[i],
+                          model: model,
                           index: i,
                           isLast: i == generations.length - 1,
                         ),
@@ -66,11 +87,13 @@ class ModelGenerationsScreen extends StatelessWidget {
 /// A vertical timeline-style row: small year stripe on the left, big card on the right.
 class _TimelineRow extends StatelessWidget {
   final CarGeneration generation;
+  final CarModel model;
   final int index;
   final bool isLast;
 
   const _TimelineRow({
     required this.generation,
+    required this.model,
     required this.index,
     required this.isLast,
   });
@@ -115,7 +138,7 @@ class _TimelineRow extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.only(
                   bottom: isLast ? 0 : AppTheme.md, left: AppTheme.sm),
-              child: _GenerationCard(generation: generation),
+              child: _GenerationCard(generation: generation, model: model),
             ),
           ),
         ],
@@ -126,7 +149,8 @@ class _TimelineRow extends StatelessWidget {
 
 class _GenerationCard extends StatelessWidget {
   final CarGeneration generation;
-  const _GenerationCard({required this.generation});
+  final CarModel model;
+  const _GenerationCard({required this.generation, required this.model});
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +167,30 @@ class _GenerationCard extends StatelessWidget {
             transitionsBuilder: (_, anim, __, child) =>
                 FadeTransition(opacity: anim, child: child),
           ),
+        ),
+        onLongPress: () => AdminActionSheet.show(
+          context,
+          title: generation.name,
+          subtitle: '${model.brand} ${model.name}  ·  ${generation.yearLabel}',
+          onEdit: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => GenerationFormScreen(
+                model: model,
+                existing: generation,
+              ),
+            ),
+          ),
+          onDelete: () async {
+            final provider = context.read<CarProvider>();
+            final ok = await confirmDelete(
+              context,
+              title: 'Hapus ${generation.name}?',
+              message: 'Semua varian di generasi ini akan ikut terhapus.',
+            );
+            if (!ok) return;
+            await provider.removeGeneration(generation.id);
+          },
         ),
         child: Container(
           decoration: BoxDecoration(

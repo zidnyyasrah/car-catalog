@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../models/car.dart';
 import '../models/car_generation.dart';
 import '../models/car_model.dart';
@@ -21,6 +23,9 @@ import '../models/car_model.dart';
 ///   variant_colors(variant_id, color)
 ///   variant_features(variant_id, feature)
 class CarRepository {
+  static const _bucket = 'car-images';
+  static const _uuid = Uuid();
+
   SupabaseClient get _db => Supabase.instance.client;
 
   /// One-shot fetch of everything. The dataset is small enough that we hydrate
@@ -100,7 +105,7 @@ class CarRepository {
         id: e.key,
         modelId: any.modelId,
         name: any.generationName,
-        chassisCode: null, // not on Car; would need a separate fetch if needed
+        chassisCode: any.generationChassisCode,
         yearStart: any.generationYearStart ?? any.yearStart,
         yearEnd: any.generationYearEnd,
         description: '',
@@ -119,6 +124,217 @@ class CarRepository {
         cars.where((c) => c.generationId == generationId).toList();
     filtered.sort((a, b) => a.priceMinMillionIdr.compareTo(b.priceMinMillionIdr));
     return filtered;
+  }
+
+  // ── Writes: storage ────────────────────────────────────────────────────────
+
+  /// Uploads a local image to the `car-images` bucket under [folder], returns
+  /// the public URL ready to store in `image_url` / `hero_image_url`.
+  Future<String> uploadImage(File file, {required String folder}) async {
+    final ext = file.path.split('.').last.toLowerCase();
+    final key = '$folder/${_uuid.v4()}.$ext';
+    await _db.storage.from(_bucket).upload(
+          key,
+          file,
+          fileOptions: FileOptions(
+            cacheControl: '3600',
+            upsert: false,
+            contentType: _mimeFor(ext),
+          ),
+        );
+    return _db.storage.from(_bucket).getPublicUrl(key);
+  }
+
+  String? _mimeFor(String ext) {
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'heic':
+        return 'image/heic';
+      default:
+        return null;
+    }
+  }
+
+  // ── Writes: brands ─────────────────────────────────────────────────────────
+
+  Future<String> upsertBrand({
+    String? id,
+    required String name,
+    required String country,
+  }) async {
+    final rowId = id ?? _uuid.v4();
+    await _db.from('brands').upsert({
+      'id': rowId,
+      'name': name,
+      'country': country,
+    });
+    return rowId;
+  }
+
+  Future<void> deleteBrand(String id) async {
+    final models = await _db.from('models').select('id').eq('brand_id', id);
+    for (final m in models as List) {
+      await deleteModel((m as Map)['id'] as String);
+    }
+    await _db.from('brands').delete().eq('id', id);
+  }
+
+  // ── Writes: models ─────────────────────────────────────────────────────────
+
+  Future<String> upsertModel({
+    String? id,
+    required String brandId,
+    required String name,
+    required String bodyType,
+    String? description,
+    String? heroImageUrl,
+  }) async {
+    final rowId = id ?? _uuid.v4();
+    await _db.from('models').upsert({
+      'id': rowId,
+      'brand_id': brandId,
+      'name': name,
+      'body_type': bodyType,
+      'description': description,
+      'hero_image_url': heroImageUrl,
+    });
+    return rowId;
+  }
+
+  Future<void> deleteModel(String id) async {
+    final gens =
+        await _db.from('generations').select('id').eq('model_id', id);
+    for (final g in gens as List) {
+      await deleteGeneration((g as Map)['id'] as String);
+    }
+    await _db.from('models').delete().eq('id', id);
+  }
+
+  // ── Writes: generations ────────────────────────────────────────────────────
+
+  Future<String> upsertGeneration({
+    String? id,
+    required String modelId,
+    required String name,
+    String? chassisCode,
+    required int yearStart,
+    int? yearEnd,
+    String? description,
+    String? heroImageUrl,
+  }) async {
+    final rowId = id ?? _uuid.v4();
+    await _db.from('generations').upsert({
+      'id': rowId,
+      'model_id': modelId,
+      'name': name,
+      'chassis_code': chassisCode,
+      'year_start': yearStart,
+      'year_end': yearEnd,
+      'description': description,
+      'hero_image_url': heroImageUrl,
+    });
+    return rowId;
+  }
+
+  Future<void> deleteGeneration(String id) async {
+    final variants =
+        await _db.from('variants').select('id').eq('generation_id', id);
+    for (final v in variants as List) {
+      await deleteVariant((v as Map)['id'] as String);
+    }
+    await _db.from('generations').delete().eq('id', id);
+  }
+
+  // ── Writes: variants (+ colors + features join tables) ─────────────────────
+
+  Future<String> upsertVariant({
+    String? id,
+    required String generationId,
+    required String trimName,
+    required int yearStart,
+    int? yearEnd,
+    required String engineType,
+    int engineDisplacementCc = 0,
+    int powerHp = 0,
+    int torqueNm = 0,
+    required String transmission,
+    required String driveSystem,
+    bool isElectric = false,
+    double fuelConsumptionKmPerL = 0,
+    int seatingCapacity = 5,
+    int groundClearanceMm = 0,
+    String? dimensions,
+    int safetyRating = 0,
+    required double priceMinMillionIdr,
+    required double priceMaxMillionIdr,
+    String? imageUrl,
+    String? description,
+    List<String> colors = const [],
+    List<String> features = const [],
+  }) async {
+    final rowId = id ?? _uuid.v4();
+    await _db.from('variants').upsert({
+      'id': rowId,
+      'generation_id': generationId,
+      'trim_name': trimName,
+      'year_start': yearStart,
+      'year_end': yearEnd,
+      'engine_type': engineType,
+      'engine_displacement_cc': engineDisplacementCc,
+      'power_hp': powerHp,
+      'torque_nm': torqueNm,
+      'transmission': transmission,
+      'drive_system': driveSystem,
+      'is_electric': isElectric,
+      'fuel_consumption_km_per_l': fuelConsumptionKmPerL,
+      'seating_capacity': seatingCapacity,
+      'ground_clearance_mm': groundClearanceMm,
+      'dimensions': dimensions,
+      'safety_rating': safetyRating,
+      'price_min_million_idr': priceMinMillionIdr,
+      'price_max_million_idr': priceMaxMillionIdr,
+      'image_url': imageUrl,
+      'description': description,
+    });
+
+    // Replace join-table rows wholesale (simplest correct semantics for an
+    // edit-everything UI: the form is the source of truth).
+    await _db.from('variant_colors').delete().eq('variant_id', rowId);
+    if (colors.isNotEmpty) {
+      await _db.from('variant_colors').insert(
+            colors.map((c) => {'variant_id': rowId, 'color': c}).toList(),
+          );
+    }
+    await _db.from('variant_features').delete().eq('variant_id', rowId);
+    if (features.isNotEmpty) {
+      await _db.from('variant_features').insert(
+            features.map((f) => {'variant_id': rowId, 'feature': f}).toList(),
+          );
+    }
+
+    return rowId;
+  }
+
+  Future<void> deleteVariant(String id) async {
+    await _db.from('variant_colors').delete().eq('variant_id', id);
+    await _db.from('variant_features').delete().eq('variant_id', id);
+    await _db.from('variants').delete().eq('id', id);
+  }
+
+  /// Lookup the brand id by display name (since the read-side flattens it).
+  Future<String?> brandIdByName(String name) async {
+    final row = await _db
+        .from('brands')
+        .select('id')
+        .eq('name', name)
+        .maybeSingle();
+    return row == null ? null : row['id'] as String;
   }
 
   // ── Mapping ────────────────────────────────────────────────────────────────
@@ -142,6 +358,7 @@ class CarRepository {
       type: model['name'] as String,
       generationId: gen['id'] as String,
       generationName: gen['name'] as String,
+      generationChassisCode: gen['chassis_code'] as String?,
       generationYearStart: gen['year_start'] as int?,
       generationYearEnd: gen['year_end'] as int?,
       variant: row['trim_name'] as String,

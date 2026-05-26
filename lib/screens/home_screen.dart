@@ -4,7 +4,9 @@ import '../providers/car_provider.dart';
 import '../data/brand_info.dart';
 import '../theme/app_theme.dart';
 import '../widgets/brand_logo.dart';
+import '../widgets/admin_actions.dart';
 import 'brand_models_screen.dart';
+import 'forms/brand_form_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,6 +15,22 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 76),
+        child: FloatingActionButton.extended(
+          backgroundColor: AppTheme.accent,
+          foregroundColor: AppTheme.onAccent,
+          elevation: 0,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BrandFormScreen()),
+          ),
+          icon: const Icon(Icons.add_rounded),
+          label: Text('BRAND',
+              style: AppTheme.eyebrow(color: AppTheme.onAccent)
+                  .copyWith(fontSize: 12)),
+        ),
+      ),
       body: SafeArea(
         bottom: false,
         child: Consumer<CarProvider>(
@@ -203,6 +221,31 @@ class _BrandCard extends StatelessWidget {
               return FadeTransition(opacity: anim, child: child);
             },
           ),
+        ),
+        onLongPress: () => AdminActionSheet.show(
+          context,
+          title: brand,
+          subtitle: '$carCount varian dalam katalog',
+          onEdit: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BrandFormScreen(
+                existingName: brand,
+                existingCountry: info.country,
+              ),
+            ),
+          ),
+          onDelete: () async {
+            final provider = context.read<CarProvider>();
+            final ok = await confirmDelete(
+              context,
+              title: 'Hapus $brand?',
+              message:
+                  'Semua model, generasi, dan varian di bawah brand ini akan ikut hilang.',
+            );
+            if (!ok) return;
+            await provider.removeBrand(brand);
+          },
         ),
         child: Hero(
           tag: 'brand-$brand',

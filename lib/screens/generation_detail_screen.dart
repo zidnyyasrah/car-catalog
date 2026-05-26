@@ -124,7 +124,7 @@ class _HeroPager extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppTheme.lg),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(AppTheme.radiusCard),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -336,52 +336,72 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(height: 1, color: AppTheme.hairline),
-        const SizedBox(height: AppTheme.lg),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('HARGA OTR', style: AppTheme.eyebrow()),
-                  const SizedBox(height: AppTheme.sm),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      car.priceLabel,
-                      style: AppTheme.display(
-                          color: AppTheme.accent, size: 28),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              children: List.generate(
-                5,
-                (i) => Padding(
-                  padding: const EdgeInsets.only(left: 2),
-                  child: Icon(
-                    i < car.safetyRatingStars
-                        ? Icons.star_rounded
-                        : Icons.star_outline_rounded,
-                    size: 16,
-                    color: AppTheme.gold,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.cream,
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+      ),
+      padding: const EdgeInsets.fromLTRB(
+          AppTheme.xl, AppTheme.lg, AppTheme.lg, AppTheme.lg),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'HARGA OTR',
+                  style: AppTheme.eyebrow(color: AppTheme.onCream)
+                      .copyWith(color: AppTheme.onCream.withOpacity(0.55)),
+                ),
+                const SizedBox(height: AppTheme.sm),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    car.priceLabel,
+                    style: AppTheme.display(
+                        color: AppTheme.onCream, size: 26),
                   ),
                 ),
-              ),
+                const SizedBox(height: AppTheme.sm),
+                Row(
+                  children: List.generate(
+                    5,
+                    (i) => Padding(
+                      padding: const EdgeInsets.only(right: 2),
+                      child: Icon(
+                        i < car.safetyRatingStars
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
+                        size: 14,
+                        color: AppTheme.onCream.withOpacity(
+                            i < car.safetyRatingStars ? 0.9 : 0.25),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        const SizedBox(height: AppTheme.lg),
-        Container(height: 1, color: AppTheme.hairline),
-      ],
+          ),
+          const SizedBox(width: AppTheme.md),
+          // Lime pill — the "primary action" tile.
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: AppTheme.accent,
+              borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+            ),
+            child: const Icon(
+              Icons.local_offer_rounded,
+              color: AppTheme.onAccent,
+              size: 26,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

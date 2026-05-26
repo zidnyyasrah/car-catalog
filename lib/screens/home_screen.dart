@@ -78,16 +78,103 @@ class _DisplayHeading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-          AppTheme.xl, AppTheme.xxl, AppTheme.xl, AppTheme.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Katalog mobil', style: AppTheme.display(size: 44)),
-          Text(
-            'Indonesia.',
-            style: AppTheme.display(color: AppTheme.accent, size: 44),
+          AppTheme.lg, AppTheme.xl, AppTheme.lg, AppTheme.lg),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           ),
-        ],
+          padding: const EdgeInsets.fromLTRB(
+              AppTheme.xl, AppTheme.xxl, AppTheme.xl, AppTheme.xl),
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              // Color blobs — the reference's signature decorative move.
+              Positioned(
+                top: -56,
+                right: -40,
+                child: _Blob(
+                    size: 160, color: AppTheme.accent.withOpacity(0.95)),
+              ),
+              Positioned(
+                top: 12,
+                right: 90,
+                child: _Blob(
+                    size: 56, color: AppTheme.electric.withOpacity(0.9)),
+              ),
+              Positioned(
+                bottom: -28,
+                right: 28,
+                child: _Diamond(
+                    size: 22, color: AppTheme.accent.withOpacity(0.9)),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('KATALOG',
+                      style: AppTheme.eyebrow(color: AppTheme.accent)),
+                  const SizedBox(height: AppTheme.lg),
+                  Text('Mobil', style: AppTheme.display(size: 44)),
+                  Text(
+                    'Indonesia.',
+                    style: AppTheme.display(
+                        color: AppTheme.accent, size: 44),
+                  ),
+                  const SizedBox(height: AppTheme.md),
+                  const SizedBox(
+                    width: 220,
+                    child: Text(
+                      'Telusuri tiap brand, model, dan generasi — dari city hatch hingga SUV ladder-frame.',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 13,
+                        height: 1.55,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Blob extends StatelessWidget {
+  final double size;
+  final Color color;
+  const _Blob({required this.size, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+  }
+}
+
+class _Diamond extends StatelessWidget {
+  final double size;
+  final Color color;
+  const _Diamond({required this.size, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: 0.785398, // 45° — diamond
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(4),
+        ),
       ),
     );
   }
@@ -106,7 +193,7 @@ class _BrandCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         onTap: () => Navigator.push(
           context,
           PageRouteBuilder(
@@ -123,8 +210,8 @@ class _BrandCard extends StatelessWidget {
             color: Colors.transparent,
             child: Container(
               decoration: BoxDecoration(
-                color: AppTheme.surface.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(18),
+                color: AppTheme.surface,
+                borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                 border: Border.all(color: AppTheme.hairline),
               ),
               padding: const EdgeInsets.fromLTRB(

@@ -3,27 +3,37 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Deep teal foundation — the dark surfaces in the reference design.
-  static const Color background = Color(0xFF1E3A3F);
-  static const Color surface = Color(0xFF26464B);
-  static const Color surfaceElevated = Color(0xFF2F5258);
-  static const Color border = Color(0xFF3A6066);
-  static const Color hairline = Color(0xFF2B4C51);
+  static const Color background = Color(0xFF0E2225);
+  static const Color surface = Color(0xFF173034);
+  static const Color surfaceElevated = Color(0xFF1F3D42);
+  static const Color border = Color(0xFF254A50);
+  static const Color hairline = Color(0xFF1B3539);
+
+  // Warm cream — the "light card on dark" surface from the reference.
+  static const Color cream = Color(0xFFF4EFE5);
+  static const Color creamMuted = Color(0xFFE6DFCF);
+  static const Color onCream = Color(0xFF0E2225);
 
   // Bright lime accent — primary action / highlight.
-  static const Color accent = Color(0xFFCBE547);
+  static const Color accent = Color(0xFFCDE74A);
   static const Color accentSoft = Color(0xFFDDEE82);
   // Text/icon color to sit on top of the lime accent.
-  static const Color onAccent = Color(0xFF1E3A3F);
+  static const Color onAccent = Color(0xFF0E2225);
 
   // Warm off-white & muted teal-greys for editorial typography.
-  static const Color textPrimary = Color(0xFFF3EFE7);
-  static const Color textSecondary = Color(0xFFA8BCB9);
-  static const Color textMuted = Color(0xFF6E8589);
+  static const Color textPrimary = Color(0xFFF1ECDF);
+  static const Color textSecondary = Color(0xFF9DB2AF);
+  static const Color textMuted = Color(0xFF60777B);
 
   // Soft lavender + champagne as secondary accents (electric kept as the
   // existing constant name so the EV chip etc. keep compiling).
   static const Color electric = Color(0xFFC8B8E0);
   static const Color gold = Color(0xFFE6D2A7);
+
+  // Pillowy corner radii — the soft-card language of the reference.
+  static const double radiusCard = 24;
+  static const double radiusPill = 28;
+  static const double radiusLg = 18;
 
   static const double sx = 4;
   static const double sm = 8;

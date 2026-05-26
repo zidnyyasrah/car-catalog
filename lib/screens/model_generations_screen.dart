@@ -133,7 +133,7 @@ class _GenerationCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         onTap: () => Navigator.push(
           context,
           PageRouteBuilder(
@@ -146,11 +146,11 @@ class _GenerationCard extends StatelessWidget {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: AppTheme.surface.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(18),
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusCard),
             border: Border.all(
               color: generation.isCurrent
-                  ? AppTheme.accent.withOpacity(0.35)
+                  ? AppTheme.accent.withOpacity(0.45)
                   : AppTheme.hairline,
             ),
           ),

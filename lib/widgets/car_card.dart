@@ -16,12 +16,12 @@ class CarCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: AppTheme.surface.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(16),
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusCard),
             border: Border.all(color: AppTheme.hairline),
           ),
           clipBehavior: Clip.hardEdge,
